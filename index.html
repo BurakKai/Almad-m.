@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="Sahte alışveriş mağazası: sepeti doldur, siparişi ver, kuryeyi izle. Para çekilmez, paket gelmez.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Almadım</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: kargo etiketi dünyası. Sıkı ürün ızgarası, fiş gibi mono detaylar, tek cesur vurgu pembe; sarı sadece etiketlerde. */
+:root{
+  --bg:#EEF0F7; --surface:#FFFFFF; --ink:#15173B; --muted:#5E6288; --line:#D6D9E8;
+  --pink:#E81F68; --blue:#2A3FE0; --sun:#FFCC33; --on-sun:#15173B; --ok:#0B8A5F; --on-accent:#FFFFFF;
+  --tile-s:78%; --tile-l:90%; --shadow:0 18px 40px -22px rgba(21,23,59,.45);
+  --card-a:#1B1E55; --card-b:#E81F68; --card-fg:#FFFFFF; --card-dim:#C9CCF2;
+  --display:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F1024; --surface:#191B38; --ink:#EDEEFA; --muted:#9A9EC4; --line:#2E3160;
+  --pink:#FF4D8B; --blue:#8E9BFF; --sun:#FFCC33; --on-sun:#15173B; --ok:#3DD6A0; --on-accent:#14061A;
+  --tile-s:42%; --tile-l:24%; --shadow:0 18px 40px -22px rgba(0,0,0,.8); color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0F1024; --surface:#191B38; --ink:#EDEEFA; --muted:#9A9EC4; --line:#2E3160;
+  --pink:#FF4D8B; --blue:#8E9BFF; --sun:#FFCC33; --on-sun:#15173B; --ok:#3DD6A0; --on-accent:#14061A;
+  --tile-s:42%; --tile-l:24%; --shadow:0 18px 40px -22px rgba(0,0,0,.8); color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--body);margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:6px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.05;letter-spacing:-.02em}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--bg);border-bottom:1.5px solid var(--ink)}
+.top .wrap{display:flex;align-items:center;gap:14px;padding-block:12px;flex-wrap:wrap}
+.logo{font:800 26px/1 var(--display);letter-spacing:-.04em}
+.logo i{font-style:normal;color:var(--pink)}
+.search{flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--ink);border-radius:999px;padding:8px 16px}
+.search input{flex:1;min-width:0;border:0;background:none;outline:0}
+.nav{display:flex;gap:6px;align-items:center}
+.nav button{padding:8px 12px;border-radius:999px;font-weight:600}
+.nav button[aria-current="true"]{background:var(--ink);color:var(--bg)}
+.cartbtn{background:var(--pink)!important;color:var(--on-accent)!important;display:flex;gap:8px;align-items:center}
+.cartbtn b{font-family:var(--mono);background:var(--on-accent);color:var(--pink);border-radius:999px;min-width:22px;padding:0 6px;font-size:12px;line-height:22px;text-align:center}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.25fr .9fr;gap:22px;padding-block:28px 18px;align-items:start}
+.hero h1{font-size:clamp(40px,7vw,84px);font-weight:800}
+.hero h1 em{font-style:normal;color:var(--pink)}
+.hero p{max-width:52ch;color:var(--muted);font-size:17px;margin:16px 0 20px}
+.stats{display:flex;flex-wrap:wrap;gap:0;border:1.5px solid var(--ink);border-radius:14px;background:var(--surface);overflow:hidden}
+.stats div{flex:1 1 130px;padding:12px 16px;border-right:1.5px dashed var(--line)}
+.stats div:last-child{border-right:0}
+.stats b{display:block;font:700 22px/1.2 var(--mono)}
+.deal{background:var(--sun);color:var(--on-sun);border:1.5px solid var(--ink);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);transform:rotate(1.2deg)}
+.deal .eyebrow{color:var(--on-sun)}
+.deal .big{font-size:96px;line-height:1;text-align:center;padding:8px 0}
+.deal h3{font-size:24px}
+.deal .row{display:flex;justify-content:space-between;align-items:end;gap:10px;flex-wrap:wrap}
+.count{font:600 20px/1 var(--mono);background:var(--on-sun);color:var(--sun);padding:8px 10px;border-radius:8px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:999px;font-weight:600;border:1.5px solid var(--ink);background:var(--surface);transition:transform .12s}
+.btn:hover{transform:translateY(-2px)}
+.btn.pri{background:var(--pink);color:var(--on-accent)}
+.btn.ink{background:var(--ink);color:var(--bg)}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+
+/* filters */
+.chips{display:flex;gap:8px;overflow-x:auto;padding-block:14px 10px;scrollbar-width:thin}
+.chip{white-space:nowrap;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:500}
+.chip small{font-family:var(--mono);color:var(--muted);margin-left:4px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-pressed="true"] small{color:inherit;opacity:.7}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:14px}
+.bar select{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px}
+.bar .right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.card{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;position:relative;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--ink);transform:translateY(-3px)}
+.tile{background:hsl(var(--h) var(--tile-s) var(--tile-l));aspect-ratio:1/.82;display:grid;place-items:center;font-size:74px;width:100%;position:relative}
+.card:hover .tile span{transform:scale(1.12) rotate(-4deg)}
+.tile span{transition:transform .2s;filter:drop-shadow(0 10px 8px rgba(0,0,0,.18))}
+.tag{position:absolute;left:10px;top:10px;font:600 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;background:var(--sun);color:var(--on-sun);padding:5px 7px;border-radius:5px;transform:rotate(-3deg)}
+.fav{position:absolute;right:8px;top:8px;width:34px;height:34px;border-radius:50%;background:var(--surface);border:1.5px solid var(--line);font-size:16px;line-height:1;color:var(--muted)}
+.fav[aria-pressed="true"]{color:var(--pink);border-color:var(--pink)}
+.info{padding:12px 14px 14px;display:flex;flex-direction:column;gap:5px;flex:1}
+.info .name{font-weight:600;line-height:1.25;text-align:left}
+.rate{font-size:12px;color:var(--muted)}
+.rate b{color:var(--ink)}
+.price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.price b{font:700 18px/1 var(--mono)}
+.price s{font:400 12px/1 var(--mono);color:var(--muted)}
+.price em{font:600 11px/1 var(--mono);font-style:normal;color:var(--pink)}
+.add{margin-top:8px;padding:9px;border-radius:10px;background:var(--ink);color:var(--bg);font-weight:600;width:100%}
+.add:hover{background:var(--pink);color:var(--on-accent)}
+.more{display:flex;justify-content:center;padding-block:26px}
+.empty{padding:50px 20px;text-align:center;color:var(--muted);border:1.5px dashed var(--line);border-radius:16px}
+
+/* overlays */
+.veil{position:fixed;inset:0;background:rgba(10,11,30,.55);z-index:50;display:flex}
+.drawer{margin-left:auto;width:min(440px,100%);height:100%;background:var(--bg);border-left:1.5px solid var(--ink);display:flex;flex-direction:column;animation:slide .22s ease-out}
+@keyframes slide{from{transform:translateX(40px);opacity:.4}}
+.dhead{display:flex;justify-content:space-between;align-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) 18px 14px;border-bottom:1.5px solid var(--ink)}
+.dhead h2{font-size:24px}
+.x{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--ink);font-size:18px;background:var(--surface)}
+.dbody{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.dfoot{padding:14px 18px calc(16px + env(safe-area-inset-bottom,0px));border-top:1.5px dashed var(--ink);background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.line{display:flex;gap:12px;align-items:center;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:10px}
+.line .mini{width:54px;height:54px;border-radius:10px;background:hsl(var(--h) var(--tile-s) var(--tile-l));display:grid;place-items:center;font-size:28px;flex:none}
+.line .mid{flex:1;min-width:0}
+.line .mid div{font-weight:600;line-height:1.2}
+.qty{display:flex;align-items:center;gap:6px;font-family:var(--mono)}
+.qty button{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--line);background:var(--bg)}
+.sum{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:13px}
+.sum.tot{font-size:18px;font-weight:700;padding-top:6px;border-top:1.5px dashed var(--line)}
+.sum .zero{color:var(--ok);font-weight:700}
+.steps{display:flex;gap:6px;font:600 11px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.steps span{flex:1;padding-bottom:8px;border-bottom:3px solid var(--line)}
+.steps span.on{color:var(--ink);border-color:var(--pink)}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label,.legend{font-weight:600;font-size:13px}
+.field input,.field select{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+.opt{display:flex;gap:12px;align-items:center;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--pink);box-shadow:inset 0 0 0 1.5px var(--pink)}
+.opt input{accent-color:var(--pink);width:18px;height:18px;flex:none}
+.opt span{flex:1;min-width:0}
+.opt small{display:block;color:var(--muted)}
+.opt i{font-style:normal;font-size:24px}
+.note{font-size:13px;color:var(--muted);background:var(--surface);border:1.5px dashed var(--line);border-radius:10px;padding:10px 12px}
+.coupon{display:flex;gap:8px}
+.coupon input{flex:1;min-width:0;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;font-family:var(--mono);text-transform:uppercase}
+
+.modal{margin:auto;width:min(1000px,calc(100% - 24px));max-height:calc(100% - 32px);overflow:auto;background:var(--bg);border:1.5px solid var(--ink);border-radius:20px;position:relative}
+.modal .x{position:sticky;float:right;top:12px;margin:12px 12px -48px 0;z-index:3}
+.ptop{display:grid;grid-template-columns:1fr 1.15fr}
+.gal{padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.gal .tile{border-radius:14px;aspect-ratio:auto;min-height:320px;flex:1;font-size:160px;transition:background .2s}
+.thumbs{display:flex;gap:8px}
+.thumbs button{flex:1;aspect-ratio:1;border-radius:10px;background:hsl(var(--h) var(--tile-s) var(--tile-l));border:1.5px solid var(--line);font-size:28px;overflow:hidden;display:grid;place-items:center}
+.thumbs button span{display:block}
+.thumbs button[aria-pressed="true"]{border-color:var(--ink);box-shadow:3px 3px 0 var(--pink)}
+.pd{padding:22px 22px 22px 6px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.pd h2{font-size:30px;padding-right:44px}
+.live{display:flex;gap:8px;align-items:baseline;font-size:13px;color:var(--muted)}
+.live b{color:var(--ink);font-family:var(--mono)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--pink);flex:none;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+.flash{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface);border:1.5px dashed var(--pink);border-radius:10px;padding:8px 12px;font-size:14px}
+.flash b{color:var(--pink);font-size:16px}
+.vars{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.vars .chip{padding:6px 12px;font-size:13px}
+.sbar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:5px}
+.sbar i{display:block;height:100%;background:var(--pink)}
+.buy{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.qty.big{border:1.5px solid var(--ink);border-radius:999px;padding:5px 8px;background:var(--surface)}
+.btn[aria-pressed="true"]{color:var(--pink);border-color:var(--pink)}
+.perks,.feat{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.perks li{padding-left:14px;border-left:3px solid var(--sun)}
+.feat{margin-top:6px}.feat li{padding-left:16px;position:relative;color:var(--muted)}
+.feat li::before{content:"";position:absolute;left:0;top:.6em;width:7px;height:7px;border-radius:2px;background:var(--blue)}
+.psec{padding:20px 22px;border-top:1.5px dashed var(--line)}
+.psec h3{font-size:22px;margin-bottom:12px}
+.hs{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}
+.mc{flex:0 0 150px;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.mc:hover{border-color:var(--ink)}
+.mt{background:hsl(var(--h) var(--tile-s) var(--tile-l));height:92px;display:grid;place-items:center;font-size:42px}
+.mi{padding:8px 10px;display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:1.25}
+.mi em{font-style:normal;color:var(--pink);font-size:11px;font-weight:600}
+.bundle{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.plus{font:700 22px var(--mono);color:var(--muted)}
+.btot{display:flex;flex-direction:column;gap:5px;margin-left:auto;align-items:flex-start}
+.btot b{font-size:22px}
+.rm{font-size:12px;color:var(--muted)}
+.rsum{display:grid;grid-template-columns:230px 1fr;gap:22px;align-items:start}
+.score{display:flex;flex-direction:column;gap:6px}
+.score>b{font:800 54px/1 var(--display)}
+.st{color:var(--pink);letter-spacing:1px}.st i{font-style:normal;color:var(--line)}
+.bars{display:flex;flex-direction:column;gap:5px;margin-block:6px}
+.bars div{display:grid;grid-template-columns:26px 1fr 38px;gap:8px;align-items:center;font-size:12px}
+.bt{height:7px;border-radius:99px;background:var(--line);overflow:hidden}.bt i{display:block;height:100%;background:var(--ink)}
+.revs{display:flex;flex-direction:column;gap:8px}
+.rh{display:flex;justify-content:space-between;gap:8px}
+.ver{color:var(--ok);font-weight:600}
+.shead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:14px 0 10px}
+.shead h2{font-size:24px}
+.rev{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
+.rev b{font-family:var(--mono);font-size:12px}
+
+/* orders */
+.page{padding-block:26px 60px}
+.page h1{font-size:clamp(32px,5vw,54px);font-weight:800;margin-bottom:16px}
+.olay{display:grid;grid-template-columns:320px 1fr;gap:18px;margin-top:18px;align-items:start}
+.olist{display:flex;flex-direction:column;gap:8px}
+.oitem{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:12px;width:100%}
+.oitem[aria-current="true"]{border-color:var(--ink);box-shadow:4px 4px 0 var(--pink)}
+.oitem .mono{font-size:12px;color:var(--muted)}
+.pill{display:inline-block;font:600 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:999px;background:var(--sun);color:var(--on-sun)}
+.pill.done{background:var(--ok);color:var(--surface)}
+.track{background:var(--surface);border:1.5px solid var(--ink);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.map{border-radius:12px;background:var(--bg);border:1.5px solid var(--line);width:100%;height:auto;display:block}
+.map .blk{fill:hsl(230 var(--tile-s) var(--tile-l))}
+.map .road{fill:none;stroke:var(--line);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.map .prog{fill:none;stroke:var(--pink);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.map text{font:600 11px var(--mono);fill:var(--muted)}
+.tl{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.tl div{font-size:12px;color:var(--muted);border-top:4px solid var(--line);padding-top:8px;line-height:1.25}
+.tl div.on{color:var(--ink);border-color:var(--pink);font-weight:600}
+.result{background:var(--sun);color:var(--on-sun);border:1.5px solid var(--ink);border-radius:14px;padding:16px}
+.result h3{font-size:26px;margin-bottom:6px}
+.receipt{font-family:var(--mono);font-size:12.5px;background:var(--bg);border:1.5px dashed var(--ink);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:5px}
+.receipt .sum{font-size:12.5px}
+.barcode{height:44px;margin-top:8px;display:flex;align-items:stretch;gap:0}
+.barcode i{background:var(--ink);display:block}
+.about{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.about article{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:18px}
+.about h3{font-size:22px;margin-bottom:8px}
+.about p{margin:0 0 8px;color:var(--muted)}
+.about a{color:var(--blue)}
+footer{border-top:1.5px solid var(--ink);padding-block:18px 28px;color:var(--muted);font-size:13px}
+.toast{position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:11px 15px;border-radius:12px;max-width:min(360px,calc(100% - 32px));font-size:14px;box-shadow:var(--shadow);animation:pop .25s ease-out}
+@keyframes pop{from{transform:translateY(14px);opacity:0}}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70}
+
+/* filtreler, çark, rozet, kart */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-bottom:14px}
+.filters select,.filters input{background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px}
+.filters input{width:98px}
+.fl{display:flex;gap:6px;align-items:center;font-weight:600;font-size:13px}
+.bell{position:relative}
+.bell b{position:absolute;right:0;top:0;font:600 10px/16px var(--mono);min-width:16px;padding:0 4px;border-radius:99px;background:var(--pink);color:var(--on-accent);text-align:center}
+.nt.new{border-color:var(--pink)}
+.modal.small{width:min(440px,calc(100% - 24px))}
+.wbox{padding:22px;display:flex;flex-direction:column;gap:12px}
+.wbox h2{font-size:30px}
+.wwrap{position:relative;width:min(300px,100%);aspect-ratio:1;margin:8px auto 2px}
+.wheel{width:100%;height:100%;border-radius:50%;border:3px solid var(--ink);position:relative;transition:transform 4.2s cubic-bezier(.12,.7,.1,1)}
+.wl{position:absolute;inset:0;display:flex;justify-content:center;padding-top:16px;pointer-events:none}
+.wl b{font:700 12px/1.15 var(--body);max-width:72px;text-align:center}
+.wpin{position:absolute;left:50%;top:-12px;transform:translateX(-50%);z-index:2;border:12px solid transparent;border-top:22px solid var(--ink)}
+.wres{margin:0;text-align:center;color:var(--muted)}
+.scard{background:radial-gradient(130% 120% at 100% 0%,var(--card-b) 0%,transparent 60%),var(--card-a);color:var(--card-fg);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:18px;border:1.5px solid var(--line);box-shadow:var(--shadow)}
+.scard .slogo{font-size:22px}
+.sk{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--card-dim)}
+.samt{font:800 58px/1.05 var(--display);letter-spacing:-.03em;color:var(--sun);overflow-wrap:anywhere}
+.sh{font:700 26px/1.1 var(--display)}
+.sem{font-size:24px;letter-spacing:3px;min-height:30px}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font:600 10px var(--mono);letter-spacing:.06em;color:var(--card-dim);text-transform:uppercase}
+.sgrid b{display:block;font-size:17px;color:var(--card-fg);overflow-wrap:anywhere}
+.prof{display:grid;grid-template-columns:300px 1fr;gap:18px;margin-top:18px;align-items:start}
+.lv{background:var(--surface);border:1.5px solid var(--ink);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.lv h2{font-size:34px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px;margin-top:8px}
+.bdg{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:2px;font-size:13px;opacity:.5}
+.bdg span{font-size:24px;line-height:1.2;filter:grayscale(1)}
+.bdg small{color:var(--muted);line-height:1.25}
+.bdg.on{opacity:1;border-color:var(--ink)}.bdg.on span{filter:none}
+
+/* kart */
+.ccwrap{perspective:900px;display:flex;justify-content:center}
+.cc{width:100%;max-width:330px;aspect-ratio:1.586;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,1.3,.5,1)}
+.cc.flip{transform:rotateY(180deg)}
+.ccf,.ccb{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;color:var(--card-fg);background:radial-gradient(120% 140% at 100% 0%,var(--card-b) 0%,transparent 55%),var(--card-a);border:1.5px solid var(--line);box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+.ccb{transform:rotateY(180deg);padding:18px 0;justify-content:flex-start;gap:14px}
+.ccrow{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.ccrow b{font:800 17px/1 var(--display);letter-spacing:-.03em}.ccrow b i{font-style:normal;color:var(--sun)}
+.ccrow small{display:block;font:600 8.5px/1.4 var(--mono);letter-spacing:.12em;color:var(--card-dim)}
+.ccrow>span{min-width:0;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chipm{width:40px;height:30px;border-radius:6px;background:linear-gradient(135deg,var(--sun),#C9962A);flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.ccno{font-size:clamp(15px,5vw,20px);letter-spacing:.08em;white-space:nowrap}
+.stripe{height:38px;background:#000}
+.sig{margin-inline:18px;background:var(--card-fg);color:var(--card-a);border-radius:4px;padding:7px 10px;display:flex;justify-content:space-between;font-size:13px}
+.ccb small{margin-inline:18px;font-size:11px;color:var(--card-dim)}
+#cardform{display:flex;flex-direction:column;gap:12px;padding-top:4px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field input.mono{letter-spacing:.06em}
+.bank{background:var(--surface);border:1.5px solid var(--ink);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.bank h3{font-size:24px}.bank p{margin:0;color:var(--muted);font-size:14px}
+.otp{font-size:28px;letter-spacing:.45em;text-align:center;padding:12px;border:1.5px dashed var(--ink);border-radius:10px;background:var(--bg);width:100%}
+/* reklam */
+.ad{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:45;width:min(330px,calc(100% - 32px));background:var(--surface);border:1.5px solid var(--ink);border-radius:16px;box-shadow:6px 6px 0 var(--pink);animation:adin .4s cubic-bezier(.3,1.4,.5,1)}
+@keyframes adin{from{transform:translateY(30px) rotate(3deg);opacity:0}}
+.ad .at{background:hsl(var(--h) var(--tile-s) var(--tile-l));height:130px;display:grid;place-items:center;font-size:76px;border-radius:14px 14px 0 0;width:100%}
+.ad .ab{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px}
+.ad h3{font-size:19px}
+.ad .x{position:absolute;right:8px;top:8px;width:30px;height:30px;font-size:16px}
+.ad .tag{font-size:11px;padding:6px 8px}
+.ad .arow{display:flex;gap:8px;margin-top:4px}.ad .arow .btn{flex:1;padding:9px 10px;font-size:14px}
+.adlbl{font:600 9px/1 var(--mono);letter-spacing:.1em;color:var(--muted)}
+
+@media (max-width:820px){
+  .ad{bottom:calc(74px + env(safe-area-inset-bottom,0px))}
+  .hero{grid-template-columns:1fr}.deal{transform:none}
+  .ptop{grid-template-columns:1fr}.gal .tile{min-height:200px;font-size:110px}.pd{padding:6px 16px 18px}.rsum{grid-template-columns:1fr}.btot{margin-left:0}.psec{padding:18px 16px}
+  .olay,.prof{grid-template-columns:1fr}
+  .tl{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .tile{font-size:56px}.info{padding:10px}
+  .nav button span.lbl{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <button class="logo" data-act="view" data-v="magaza" aria-label="Almadım ana sayfa">almadım<i>.</i></button>
+  <label class="search"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Almayacağın şeyi ara" autocomplete="off" aria-label="Ürün ara"></label>
+  <nav class="nav">
+    <button data-act="view" data-v="magaza" id="nav-magaza">Mağaza</button>
+    <button data-act="view" data-v="siparisler" id="nav-siparisler">Siparişler</button>
+    <button data-act="view" data-v="hakkinda" id="nav-hakkinda">Nedir?</button>
+    <button data-act="wheel">Çark</button>
+    <button class="bell" data-act="notes" aria-label="Bildirimler">🔔<b id="nc" hidden>0</b></button>
+    <button class="cartbtn" data-act="cart" aria-label="Sepeti aç"><span class="lbl">Sepet</span><b id="cc">0</b></button>
+  </nav>
+</div></header>
+
+<main>
+<section id="v-magaza"><div class="wrap">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">Sahte mağaza · gerçek keyif · ₺0 tahsilat</div>
+      <h1>Sepeti doldur.<br><em>Kartın rahat uyusun.</em></h1>
+      <p>Burada her şeyi sepete atar, siparişi verir, kuryeyi haritadan izlersin. Para çekilmez, paket gelmez. Geriye sadece alışverişin tatlı kısmı kalır.</p>
+      <div class="stats">
+        <div><span class="eyebrow">Cebinde kalan</span><b id="s-saved">₺0</b></div>
+        <div><span class="eyebrow">Gelmeyen paket</span><b id="s-orders">0</b></div>
+        <div><span class="eyebrow">Katalog</span><b id="s-cat">0</b></div>
+      </div>
+    </div>
+    <aside class="deal" id="deal"></aside>
+  </div>
+  <div id="strips"></div>
+  <div class="chips" id="chips" role="group" aria-label="Kategoriler"></div>
+  <div class="bar">
+    <span class="mono" id="count"></span>
+    <div class="right">
+      <button class="chip" id="favf" data-act="favf" aria-pressed="false">♥ Favoriler</button>
+      <select id="sort" aria-label="Sırala">
+        <option value="rec">Önerilen</option><option value="asc">Fiyat: artan</option><option value="desc">Fiyat: azalan</option>
+        <option value="disc">En yüksek indirim</option><option value="pop">En çok alınmayan</option><option value="rate">En yüksek puan</option>
+      </select>
+    </div>
+  </div>
+  <div class="filters">
+    <span class="fl">Fiyat <input id="f-min" inputmode="numeric" placeholder="en az ₺" aria-label="En düşük fiyat"><input id="f-max" inputmode="numeric" placeholder="en çok ₺" aria-label="En yüksek fiyat"></span>
+    <select id="f-brand" aria-label="Marka"></select>
+    <select id="f-rate" aria-label="Puan"><option value="0">Tüm puanlar</option><option value="4">4,0 ve üzeri</option><option value="4.5">4,5 ve üzeri</option><option value="4.8">4,8 ve üzeri</option></select>
+    <button class="chip" id="f-disc" data-act="fdisc" aria-pressed="false">Sadece indirimdekiler</button>
+    <button class="chip" id="f-clear" data-act="fclear" hidden>Filtreleri temizle ×</button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="more"><button class="btn" id="more" data-act="more">Daha fazla göster</button></div>
+</div></section>
+
+<section id="v-siparisler" hidden><div class="wrap page">
+  <h1>Gelmeyen siparişlerin</h1>
+  <div class="stats" id="ostats"></div>
+  <div id="profile"></div>
+  <div id="obody"></div>
+</div></section>
+
+<section id="v-hakkinda" hidden><div class="wrap page">
+  <h1>Dopamin sitesi nedir?</h1>
+  <div class="about">
+    <article><h3>Güney Kore'den çıkan akım</h3><p>Gece yarısı yemek ve alışveriş uygulamalarını açıp hiçbir şey almadan kapatan Koreli Z kuşağı, bu alışkanlığı oyuna çevirdi. Gerçeğine benzeyen ama ödeme ve teslimat içermeyen sitelere dopamin sitesi deniyor.</p><p>En bilinen örnek, yemeğin hiç gelmediği bir sipariş uygulaması. Sipariş sonunda sana kaç kalori ve kaç lira kurtardığını söylüyor.</p></article>
+    <article><h3>Neden işe yarıyor?</h3><p>Alışverişin heyecanı çoğunlukla paket gelmeden önce yaşanır: gezmek, seçmek, sepete atmak, kargoyu takip etmek. Bu site o kısmı bırakıp faturayı çıkarıyor.</p><p>Psikologların uyarısı da var: sahte ödeme düğmesi o anki harcamayı durdurur ama alışkanlığın kendisini çözmez. Kendini sık sık burada buluyorsan bunu bir işaret olarak görebilirsin.</p></article>
+    <article><h3>Bu sitede ne gerçek?</h3><p>Hiçbir şey satılmıyor. Markalar ve yorumlar uydurma, ürünler yok. Kart bilgisi sorulmaz, yazdıkların yalnızca kendi tarayıcında durur ve hiçbir yere gönderilmez.</p><p>Gerçek olan tek şey toplam: almadığın her şeyin tutarı Siparişler sayfasında birikir.</p></article>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">almadım. bir sahte mağazadır. Burada verilen siparişler için ödeme alınmaz ve teslimat yapılmaz.</div></footer>
+
+<div class="veil" id="veil" hidden></div>
+<aside class="ad" id="ad" hidden aria-label="Reklam"></aside>
+<div class="toast" id="toast" hidden role="status"></div>
+<canvas id="confetti" hidden></canvas>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), fmt=n=>'₺'+Math.round(n).toLocaleString('tr-TR');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let seed=20261003; const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}; const pick=a=>a[Math.floor(rnd()*a.length)];
+
+/* ---------- katalog ---------- */
+const CATS=[
+ {k:'elektronik',n:'Elektronik',h:228,v:['Lite','Standart','Pro','Pro Max','Ultra'],m:[.6,.8,1,1.3,1.75],b:['Novu','Orbit9','Lumora','Kuzgun','Pikselya'],
+  f:['Tek şarjla günlerce çekmeceden çıkmadan durur','Kutu açılışı hayal gücüne bırakılmıştır','Yazılım güncellemesi hiç gerekmez','Çizilmez, çünkü hiç dokunulmaz'],
+  r:['Pil ömrü efsane, hiç şarj etmedim çünkü elimde yok.','Ekranı o kadar net ki hayal ederken bile gözüm aldı.','Kurulumu sıfır dakika sürdü. Kurulacak bir şey gelmedi.','Eski cihazım bunu duyunca rahatladı, emekliliği ertelendi.','Kutudan şarj aleti çıkmıyormuş, kutu da çıkmadı, eşitlendik.','Teknoloji sitelerinde incelemesini izledim, sepete attım, yattım. Mükemmel akşam.'],
+  i:[['📱','Akıllı Telefon',34999],['💻','Dizüstü Bilgisayar',52999],['🎧','Kablosuz Kulaklık',4299],['⌚','Akıllı Saat',8999],['📷','Aynasız Fotoğraf Makinesi',41999],['🖥️','27 inç Monitör',9499],['⌨️','Mekanik Klavye',2799],['🖱️','Kablosuz Mouse',1299],['🔊','Bluetooth Hoparlör',3499],['📺','65 inç OLED TV',64999],['🎙️','Yayıncı Mikrofonu',3899],['🔋','Hızlı Şarj Powerbank',1199],['🚁','Kameralı Drone',27999],['🖨️','Lazer Yazıcı',5499],['📟','Tablet',18999],['📡','Mesh Wi-Fi Sistemi',4799],['📹','Aksiyon Kamerası',11999],['📽️','Ev Sinema Projektörü',23999],['💾','Taşınabilir SSD',2899],['🎚️','Soundbar',8499],['🪫','Kablosuz Şarj Standı',899],['📻','Retro Radyo',1799],['🔦','Akıllı Ampul Seti',1099],['🛰️','Uydu İnternet Kiti',19999]]},
+ {k:'oyun',n:'Oyun',h:268,v:['Standart','Deluxe','Gold','Koleksiyoncu','Efsane Paket'],m:[1,1.3,1.6,2.2,3.1],b:['Orbit9','Zimba','Halka','Pikselya'],
+  f:['Yükleme ekranı yok, çünkü oyun yok','Bitirmeden rafa kaldırma derdi bitti','Arkadaşlarına sende var diyebilirsin','Kütüphanende yer kaplamaz'],
+  r:['Zaten oynamadığım oyunlara bir yenisini eklemedim. Gelişim bu.','Kütüphanemde 214 oynanmamış oyun var, bu 215. olmadı.','İndirim görünce elim gitti, buraya geldim, kurtuldum.','Arkadaşlar akşam gir dedi, giremedim. Bahanem hazır.','Ön siparişini verdim, çıkış günü hiçbir şey olmadı. Huzur.','Koltuğu almadım ama oturup düşündüm, rahat gibiydi.'],
+  i:[['🎮','Oyun Konsolu',24999],['🕹️','Arcade Kontrolcü',4599],['🥽','VR Başlık',21999],['🎲','Strateji Kutu Oyunu',1299],['🧩','3000 Parça Puzzle',699],['👾','Retro El Konsolu',3299],['💺','Oyuncu Koltuğu',8999],['🃏','Koleksiyon Kart Destesi',449],['♟️','Ahşap Satranç Takımı',1899],['🎯','Elektronik Dart Seti',999],['🏎️','Yarış Direksiyon Seti',12999],['🧱','Yapı Blokları Şehir Seti',5499],['🎰','Masaüstü Langırt',2199],['🧙','Zar ve Figür Macera Seti',1599],['🐉','Açık Dünya RPG Oyunu',1999],['⚔️','Ortaçağ Strateji Oyunu',1499],['🧟','Hayatta Kalma Oyunu',1299],['🛸','Uzay Keşif Oyunu',1699],['🎱','Bilardo Masası',34999],['🀄','Okey Takımı',899],['🪄','Parti Kart Oyunu',549],['🎳','Ev Tipi Bowling Seti',1299]]},
+ {k:'moda',n:'Moda',h:338,v:['Siyah','Krem','Lacivert','Sezon Rengi','Sınırlı Üretim'],m:[1,1,1.05,1.2,1.9],b:['Perra','Atlasya','Dalgakıran','Yumak','Mio&Kum'],
+  f:['Her bedene uyar, denemesi yok','Ütü istemez, askı istemez','Dolapta yer açmana gerek kalmaz','Modası geçse de üzülmezsin'],
+  r:['Bedeni tam oldu mu bilmiyorum ama iade derdi olmadı.','Dolabımda yer yoktu, bu ürün o yere saygı duydu.','Üstümde çok güzel durmadı, çünkü hiç durmadı.','Arkadaşım nereden aldın diye soramadı. Gizemimi korudum.','Kumaşı fotoğrafta kaliteli görünüyor. Daha fazlasını bilemem.','Sezon indirimi diye koştum, ₺0 ödedim. Gerçek indirim bu.'],
+  i:[['🧥','Yün Kaban',7499],['👟','Günlük Sneaker',3899],['👗','Midi Elbise',2499],['👜','Deri Omuz Çantası',5999],['🕶️','Güneş Gözlüğü',2199],['🧢','Kasket',549],['👖','Bol Kesim Jean',1699],['🧣','Kaşmir Atkı',1899],['👔','Keten Gömlek',1399],['🥾','Yürüyüş Botu',4599],['🧤','Deri Eldiven',999],['👕','Oversize Tişört',599],['🎒','Şehir Sırt Çantası',2299],['👠','Topuklu Ayakkabı',3199],['🧦','Desenli Çorap Seti',349],['👘','Saten Sabahlık',1799],['🩳','Keten Şort',799],['👒','Hasır Şapka',649],['🥿','Babet',1499],['🩱','Mayo',1199],['👢','Çizme',5299],['🧳','Kabin Boy Valiz',3999],['👚','Triko Kazak',1599],['🥼','Trençkot',6499],['👛','Cüzdan',1299]]},
+ {k:'taki',n:'Takı & Saat',h:48,v:['Gümüş','Rose','Altın Kaplama','14 Ayar','Tek Taş'],m:[.6,.8,1,2.4,4.5],b:['Halka','Lumora','Atlasya'],
+  f:['Kararmaz, kaybolmaz, çalınmaz','Sigorta gerektirmez','Her kombine hayalen uyar','Kutusu da pek şıktı muhtemelen'],
+  r:['Parıltısı ekrandan bile göz aldı. Kasaya koymama gerek kalmadı.','Yıl dönümünde hediye etmedim, onun yerine güzel bir akşam geçirdik.','Bileğimde durmuyor ama aklımda duruyor.','Kuyumcu vitrinine bakmak gibiydi, ama pijamayla.','Tek taş bakıp tek kuruş vermedim.'],
+  i:[['💍','Yüzük',2499],['📿','Kolye',2999],['⌚','Otomatik Kol Saati',18999],['👑','Taç',9999],['💎','Küpe',3499],['🔗','Zincir Bileklik',1999],['🧿','Nazar Boncuklu Kolye',899],['🕰️','Cep Saati',6499],['🪙','Koleksiyon Madalyonu',4299],['🦋','Broş',1299],['🪬','Hamsa Bileklik',749],['⏱️','Kronograf Saat',27999],['🎀','İpek Saç Tokası',399],['🐚','İnci Kolye',7999]]},
+ {k:'ev',n:'Ev & Yaşam',h:158,v:['Mini','Küçük','Orta','Büyük','Salon Boy'],m:[.55,.75,1,1.4,1.9],b:['Yumak','Pusula','Lumora','Evcimen'],
+  f:['Montaj gerektirmez, alyan anahtarı kaybolmaz','Toz tutmaz','Salonun ölçüsünü almana gerek yok','Taşınırken koli derdi çıkarmaz'],
+  r:['Salona çok yakıştı diyeceğim ama salon aynı duruyor.','Montajı çok kolaydı. Vida bile artmadı.','Eşim bunu nereye koyacağız demedi. İlk kez.','Ev sahibi bile fark etmedi, sessiz bir ürün.','Kargo merdivenden çıkaramaz diye korkuyordum, çıkarmadı da.','Toz almama gerek kalmayan tek eşyam.'],
+  i:[['🛋️','Üçlü Koltuk',28999],['🪴','Devetabanı Saksı Bitkisi',899],['🕯️','Kokulu Mum Seti',649],['🛏️','Ortopedik Yatak',17999],['🪞','Boy Aynası',3299],['🖼️','Çerçeveli Tablo',1499],['🧺','Hasır Sepet',499],['💡','Lambader',2199],['🪑','Tasarım Sandalye',3999],['🧹','Robot Süpürge',15999],['🛁','Bambu Banyo Seti',799],['🧶','Örgü Battaniye',1299],['⏰','Analog Masa Saati',459],['🪟','Keten Perde',1899],['🌫️','Hava Nemlendirici',2499],['🚪','Ahşap Gardırop',12999],['🧸','Dekoratif Yastık',349],['🪔','Tuz Lambası',599],['📚','Kitaplık',4999],['🧼','Çamaşır Makinesi',21999],['❄️','Klima',27999],['🌀','Sessiz Vantilatör',2299],['🗄️','Çekmeceli Şifonyer',5999],['🪆','El Boyaması Biblo',749]]},
+ {k:'mutfak',n:'Mutfak',h:28,v:['Tekli','Çiftli','Aile Boyu','Misafir Seti','Şef Serisi'],m:[.7,.85,1,1.35,1.9],b:['Pusula','Tekir','Novu','Evcimen'],
+  f:['Bulaşık çıkarmaz','Tezgahta yer kaplamaz','Üç kez kullanıp dolaba kaldırma aşaması atlanır','Yanmaz, yapışmaz, gelmez'],
+  r:['Üç kere kullanıp dolaba kaldıracaktım, o adımı atladım.','Tezgahımda yer kalmamıştı zaten. Kader.','Annem bizde bundan var dedi. Bizde yok ama onda var.','Kahvesi nasıl bilmiyorum, hayali gayet yoğun.','Bulaşık makinesine girer mi diye sormama gerek kalmadı.','Bununla yapmadığım yemekler efsane oldu.'],
+  i:[['☕','Espresso Makinesi',14999],['🍳','Döküm Tava',1899],['🔪','Şef Bıçağı',2499],['🫖','Çelik Çaydanlık',1299],['🥤','Blender',3299],['🍞','Ekmek Kızartma Makinesi',1799],['🧇','Waffle Makinesi',2199],['🍵','Porselen Fincan Seti',999],['🧊','Buz Makinesi',5499],['🍕','Taş Tabanlı Pizza Fırını',11999],['🥘','Bakır Tencere',3499],['🍶','Paslanmaz Termos',749],['🥢','Bambu Servis Seti',399],['🍲','Yavaş Pişirici',4299],['🍟','Airfryer',6999],['🧂','Değirmenli Baharat Seti',599],['🍷','Kristal Kadeh Seti',1499],['🥄','24 Parça Çatal Kaşık Seti',1999],['🫕','Fondü Seti',1299],['🍽️','Seramik Yemek Takımı',4499],['🥣','Stand Mikser',12999],['🧉','Türk Kahvesi Makinesi',2799]]},
+ {k:'yemek',n:'Sıcak Sipariş',h:8,v:['Tek','Menü','Duble','Aile Boy','Parti Boy'],m:[1,1.4,1.75,2.8,4.6],b:['Dumanüstü','Köşebaşı','Gece Ocağı','Acıktım Usta'],
+  f:['Sıfır kalori, garantili','Soğumaz, çünkü hiç sıcak olmadı','Yanında sos unutulmaz','Gece 03.00 pişmanlığı içermez'],
+  r:['Gece 2 de sipariş verdim, sabah pişman olmadım. İlk kez.','Sıcak gelmedi, soğuk da gelmedi. Dengeli bir servis.','2.120 kaloriyi bana bıraktılar. Teşekkür ederim.','Kurye zili çalmadı, ben de kapıyı açmadım. Uyum içindeyiz.','Yanında ayran unutmuşlar. Gerisini de unutmuşlar.','Diyetisyenim bu siteyi bana önerse yeridir.','Acıktım, sipariş verdim, makarna yaptım. Sistem çalışıyor.'],
+  i:[['🍔','Hamburger',289],['🍕','Karışık Pizza',349],['🌯','Tavuk Dürüm',199],['🍣','Sushi Tabağı',649],['🍜','Ramen',379],['🥙','Döner',219],['🍗','Çıtır Tavuk Kovası',329],['🍟','Patates Kızartması',119],['🌮','Taco',259],['🥟','Kayseri Mantısı',279],['🍰','San Sebastian Cheesecake',229],['🍩','Donut Kutusu',189],['🧆','Falafel Tabağı',209],['🥗','Sezar Salata',199],['🍝','Kremalı Makarna',249],['🍦','Dondurma',99],['🥞','Pankek Kulesi',219],['🍛','Köri Tavuk',289],['🫓','Lahmacun',129],['🍢','Adana Şiş',349],['🧇','Çikolatalı Waffle',239],['🥪','Kulüp Sandviç',229],['🍤','Karides Tempura',459],['🥩','Dana Antrikot',799],['🍮','Künefe',199],['🥐','Tereyağlı Kruvasan',89]]},
+ {k:'lezzet',n:'Market',h:14,v:['Tadımlık','Paket','Kutu','Koli','Toptan'],m:[.5,.8,1,3.2,8],b:['Tekir','Yumak','Fıstıkzade','Kilerci'],
+  f:['Son kullanma tarihi geçmez','Buzdolabında yer açmana gerek yok','Misafire ikram edilmez, bitmez','Kalorisi tamamen teorik'],
+  r:['Bir oturuşta bitirmedim. İrade abidesiyim.','Son kullanma tarihini kaçırmadım, çünkü tarih yok.','Kilere koyacak yerim yoktu, çok isabet oldu.','Tadına bakmadım ama fikri lezzetliydi.','Misafire çıkaracaktım, misafir de gelmedi. Tema bütünlüğü.'],
+  i:[['🍫','Bitter Çikolata',149],['🧀','Eski Kaşar',489],['🍯','Karakovan Balı',899],['🫘','Çekirdek Kahve',429],['🍵','Tören Sınıfı Matcha',649],['🫒','Soğuk Sıkım Zeytinyağı',599],['🍪','Tereyağlı Kurabiye',189],['🥜','Antep Fıstığı',799],['🍝','El Yapımı Makarna',159],['🌶️','Acı Sos Üçlüsü',279],['🧋','Bubble Tea Seti',349],['🍬','Çifte Kavrulmuş Lokum',259],['🍓','Çilek Reçeli',139],['🧁','Cupcake Kutusu',319],['🥭','Kurutulmuş Mango',179],['🍿','Karamelli Patlamış Mısır',99],['🥫','Közlenmiş Biber Konservesi',129],['🍋','Limon Kolonyası Değil, Limonata',89],['🧈','Köy Tereyağı',399],['🥖','Ekşi Mayalı Ekmek',119],['🍇','Kuru Üzüm ve Ceviz Karışımı',219],['🫖','Rize Çayı',249]]},
+ {k:'guzellik',n:'Güzellik',h:312,v:['Deneme Boy','30 ml','50 ml','100 ml','Hediye Seti'],m:[.4,.7,1,1.6,2.6],b:['Lumora','Perra','Halka','Mio&Kum'],
+  f:['Cilt tipini sormaz','Banyoda yarım kalan şişelere eklenmez','Kokusu tamamen hayal gücüne bağlı','Son damlasına kadar bitmez'],
+  r:['Banyomda 11 yarım şişe var, 12. olmadı.','Cildim aynı kaldı, cüzdanım da. Fark yaratmayan fark.','Kokusunu tarif edemem, kimse edemez.','On adımlı rutinime sıfırıncı adım olarak ekledim.','Etkisini 4 haftada görürsünüz yazıyordu, 4 haftadır aynı şeyi görüyorum.'],
+  i:[['💄','Mat Ruj',549],['🧴','Nemlendirici Krem',899],['💅','Oje Seti',399],['🌸','Çiçeksi Parfüm',3499],['🧼','El Yapımı Sabun',199],['🪒','Tıraş Seti',1299],['💆','Masaj Tabancası',3999],['🧖','Kil Maskesi',459],['🪮','Ahşap Tarak',249],['🫧','Banyo Bombası',179],['🌿','C Vitamini Serumu',1099],['💨','Saç Kurutma Makinesi',6999],['🪞','Işıklı Makyaj Aynası',1499],['🧴','Güneş Kremi',649],['🌹','Gül Suyu Tonik',329],['🕯️','Masaj Mumu',499],['💇','Saç Düzleştirici',4299],['🌊','Deniz Tuzu Spreyi',379],['🥥','Hindistan Cevizi Yağı',289],['🪥','Sonik Diş Fırçası',2499]]},
+ {k:'spor',n:'Spor & Outdoor',h:132,v:['Başlangıç','Hobi','Sporcu','Yarışmacı','Profesyonel'],m:[.6,.8,1,1.4,2],b:['Dalgakıran','Kuzgun','Zimba','Zirve'],
+  f:['Pazartesi başlama baskısı yapmaz','Balkonda askılık olmaz','Terletmez','Sakatlık riski sıfır'],
+  r:['Balkonda çamaşır askısı olmasına gerek kalmadı.','Pazartesi başlayacaktım. Pazartesi geldi, ürün gelmedi, anlaştık.','Spor salonu üyeliğimle aynı performansı gösterdi.','Kondisyonum aynı, vicdanım rahat.','Kamp planı yaptım, sepeti doldurdum, evde çay içtim. Harika tatil.','Dizlerim teşekkür ediyor.'],
+  i:[['🚲','Şehir Bisikleti',16999],['🛹','Kaykay',2799],['⛺','4 Kişilik Çadır',7499],['🏋️','Ayarlanabilir Dambıl Seti',5999],['🧘','Yoga Matı',699],['⚽','Maç Topu',1199],['🏀','Basketbol Potası',6499],['🎾','Tenis Raketi',4299],['🛶','Şişme Kano',9999],['🏄','Sörf Tahtası',18999],['🎿','Kayak Takımı',22999],['🛼','Paten',3199],['🧗','Tırmanış Emniyet Seti',4799],['🎣','Olta Takımı',2399],['🏓','Masa Tenisi Masası',8999],['🤿','Şnorkel Seti',1299],['🏃','Koşu Bandı',27999],['🥊','Boks Torbası ve Eldiven',3999],['🏸','Badminton Seti',899],['🛷','Kızak',1499],['🏹','Okçuluk Başlangıç Yayı',5499],['🥾','Trekking Batonu',1099],['🎽','Koşu Yeleği',1799],['🏕️','Uyku Tulumu',2499]]},
+ {k:'hobi',n:'Kitap & Hobi',h:44,v:['Cep Boy','Standart','Özel Baskı','İmzalı','Usta İşi'],m:[.7,1,1.5,2.4,3.6],b:['Tekir','Atlasya','Pusula','Sayfa41'],
+  f:['Okunmayı bekleyenler rafına eklenmez','Yarım kalmaz','Malzemesi kurumaz','Hevesin geçince yük olmaz'],
+  r:['Okunacaklar yığınım 43 kitapta kaldı. Yığın rahat bir nefes aldı.','Hevesim iki haftada geçecekti, bu sefer para harcamadan geçti.','Başlangıç setini almadan ustalaştım, en azından videolarda.','Kapağı çok güzeldi, içi de güzeldir herhalde.','Yeni hobim hobi malzemesi almamak oldu.'],
+  i:[['📚','Dünya Klasikleri Seti',1899],['🎨','Yağlı Boya Seti',1499],['🔭','Teleskop',9999],['🔬','Mikroskop',6499],['📓','Deri Kapaklı Defter',449],['🖋️','Dolma Kalem',2999],['🧵','Dikiş Makinesi',8499],['🪡','Nakış Başlangıç Seti',349],['📸','Şipşak Fotoğraf Makinesi',3799],['🖌️','Suluboya Seti',799],['🧶','Örgü Başlangıç Seti',549],['🏺','Seramik Çarkı',11999],['📖','Bilim Kurgu Serisi',1299],['🗺️','Kazımalı Dünya Haritası',599],['✂️','Maket Yapım Seti',899],['🕯️','Mum Yapım Seti',749],['🔮','Kristal Yetiştirme Seti',449],['📔','Polisiye Roman Seti',999],['🧲','Elektronik Deney Seti',2199],['🪵','Ahşap Oyma Seti',1399]]},
+ {k:'muzik',n:'Müzik',h:204,v:['Öğrenci','Standart','Sahne','Stüdyo','İmza Serisi'],m:[.6,1,1.6,2.4,3.8],b:['Akorda','Halka','Kuzgun'],
+  f:['Komşuyu rahatsız etmez','Akort gerektirmez','Üç akor öğrenip bırakma evresi atlanır','Kılıfıyla birlikte gelmez'],
+  r:['Komşular teşekkür etti.','Üç akor öğrenip bırakacaktım, bıraktım, akorsuz.','Sesi hayalimde çok temiz.','Köşede toz tutmuyor, çünkü köşe boş.','İlk konserimi vermedim, biletler de satılmadı.'],
+  i:[['🎸','Elektro Gitar',14999],['🎹','Dijital Piyano',21999],['🥁','Elektronik Davul',17999],['📀','Pikap',7999],['🎺','Trompet',11999],['🎻','Keman',8999],['🪕','Cura',3499],['🎷','Saksafon',24999],['🪗','Akordeon',19999],['🎤','Karaoke Seti',2999],['🎛️','DJ Kontrolcü',9499],['🪘','Darbuka',1299],['🎼','Nota Sehpası',449],['🎵','Plak Koleksiyonu',2499],['🪈','Yan Flüt',6999],['📯','Amfi',7499]]},
+ {k:'ofis',n:'Ofis & Kırtasiye',h:214,v:['Öğrenci','Ev Ofis','Ekip','Yönetici','Genel Müdür'],m:[.6,1,1.5,2.2,3.5],b:['Sayfa41','Novu','Pusula'],
+  f:['Verimliliği garanti etmez, kimse edemez','Masada yer açmana gerek yok','Mürekkebi bitmez','Toplantıya gerek kalmadan anlaşılır'],
+  r:['Verimliliğim artmadı ama masam ferah.','Ajandayı alıp ilk üç sayfasını dolduracaktım. Üç sayfa emek kurtardım.','Bu sandalyeyle belim düzelmedi, cüzdanım da bükülmedi.','Kalem setine bakıp eski tükenmezle devam ettim.','Yeni dönem motivasyonu, eski kırtasiye.'],
+  i:[['🪑','Ergonomik Ofis Koltuğu',9999],['🗂️','Dosya Düzenleyici',349],['🖊️','Kalem Seti',299],['📒','Planlayıcı Ajanda',499],['📎','Masa Düzenleyici Set',449],['🧮','Bilimsel Hesap Makinesi',899],['📌','Mantar Pano',399],['🖇️','Zımba ve Delgeç Seti',249],['💼','Deri Evrak Çantası',4999],['🗃️','Çekmeceli Arşiv Kutusu',799],['📐','Teknik Çizim Seti',649],['🖍️','72 Renk Kuru Boya',549],['🗑️','Sensörlü Çöp Kovası',1299],['💡','Masa Lambası',999],['🪜','Yükseklik Ayarlı Masa',12999],['🧾','Etiket Yazıcı',1899],['📕','Sert Kapak Defter Seti',329],['🔖','Manyetik Ayraç Seti',99]]},
+ {k:'evcil',n:'Evcil Dost',h:188,v:['Mini','Küçük Irk','Orta','Büyük Irk','Dev'],m:[.6,.8,1,1.3,1.8],b:['Tekir','Zimba','Halka','Patiko'],
+  f:['Kedin yine kutusuyla oynamaz, çünkü kutu yok','Tüy tutmaz','Kemirilmez','Veteriner onayı gerekmez'],
+  r:['Kedim zaten kutusuyla oynayacaktı. Kutu da gelmeyince ikimiz de sakin kaldık.','Köpeğim hiç fark etmedi, kuyruk sallamaya devam.','Yatağı almadım, yine benim yastığımda yatıyor.','Balıklar görüş bildirmedi.','Patili dostum eski terliğimle gayet mutlu.'],
+  i:[['🐈','Kedi Tırmalama Kulesi',2999],['🐕','Ortopedik Köpek Yatağı',1899],['🐠','Akvaryum Seti',5499],['🦴','Çiğneme Kemiği Paketi',249],['🐹','Hamster Kafesi',1299],['🦜','Kuş Oyun Parkı',899],['🎾','Top Fırlatma Makinesi',3499],['🧶','Kedi Oyuncak Seti',199],['🥣','Otomatik Mama Kabı',2799],['🚿','Evcil Hayvan Çeşmesi',1099],['🧥','Köpek Yağmurluğu',549],['🐇','Tavşan Kulübesi',2299],['🐢','Kaplumbağa Terraryumu',3299],['🦮','Reflektörlü Tasma Seti',449],['🐟','Somonlu Ödül Maması',159],['🪶','Lazerli Kedi Oyuncağı',399],['🧳','Taşıma Çantası',1299]]},
+ {k:'cocuk',n:'Oyuncak & Bebek',h:52,v:['Tekli','İkili Set','Kardeş Paketi','Dev Set','Anaokulu Paketi'],m:[1,1.7,2.3,3,5.5],b:['Yumak','Halka','Orbit9','Minikçe'],
+  f:['Pili bitmez, sesi çıkmaz','Gece yarısı üstüne basılmaz','Parçası kaybolmaz','İki günde sıkılma aşaması atlanır'],
+  r:['Gece karanlıkta üstüne basmadım. En büyük artısı bu.','Çocuk iki gün oynayıp bırakacaktı, iki günü kazandık.','Pili bitmiyor, sesi çıkmıyor. Ebeveyn dostu.','Yeğenim hediyeyi sormadı, ben de konuyu açmadım.','Salonda oyuncak dağı aynı yükseklikte kaldı.'],
+  i:[['🧸','Peluş Ayı',599],['🪀','Işıklı Yoyo',149],['🚂','Ahşap Tren Seti',1899],['🪁','Uçurtma',229],['🛴','Scooter',2499],['🤖','Kodlanabilir Robot',4999],['🦕','Dinozor Figürü',399],['🎠','Sallanan At',2799],['🚀','Su Roketi',349],['🫧','Baloncuk Makinesi',459],['🎪','Oyun Çadırı',1299],['🚒','İtfaiye Aracı',899],['🍼','Biberon Seti',449],['👶','Bebek Arabası',14999],['🧩','Ahşap Yapboz',249],['🎨','Parmak Boyası',199],['🚜','Kumandalı Traktör',1799],['🪆','Matruşka',549],['🛝','Bahçe Kaydırağı',6999],['🎈','Parti Balon Seti',179]]},
+ {k:'oto',n:'Oto & Moto',h:200,v:['Şehir','Konfor','Sport','Elektrikli','Performans'],m:[.7,1,1.3,1.6,2.4],b:['Kuzgun','Orbit9','Rüzgargülü'],
+  f:['Park yeri aramaz','Muayenesi, sigortası, kaskosu yok','Yakıt tüketimi 0,0 litre','Trafikte beklemez'],
+  r:['Park yeri bulma derdim olmadı.','Yakıt tüketimi gerçekten sıfır, abartmamışlar.','Muayene günü geldi geçti, umurumda olmadı.','Komşu yeni araba mı diye sormadı, kıskanmadı da.','Test sürüşünü rüyamda yaptım, yol tutuşu iyiydi.'],
+  i:[['🚗','Hatchback Otomobil',1450000],['🚙','SUV',2650000],['🏍️','Motosiklet',420000],['🛵','Scooter Motor',135000],['🚐','Karavan',3900000],['🛻','Pikap',2300000],['🚘','Sedan',1890000],['🛞','4 lü Lastik Seti',18999],['🪖','Kapalı Kask',6499],['🧽','Oto Bakım Seti',899],['🔌','Ev Tipi Şarj İstasyonu',32999],['📍','Araç İçi Kamera',3499],['🧰','Yol Yardım Çantası',1299],['🚲','Elektrikli Bisiklet',54999],['🛺','Tuk Tuk',310000],['🚤','Sürat Teknesi',2100000]]},
+ {k:'bahce',n:'Bahçe & Yapı',h:108,v:['Balkon','Teras','Bahçe','Çiftlik','Malikane'],m:[.5,.8,1,1.8,3.2],b:['Evcimen','Zirve','Pusula'],
+  f:['Sulama istemez','Komşu ödünç istemez','Garajda paslanmaz','Mevsimi geçmez'],
+  r:['Sulamayı unutmadım çünkü sulayacak bir şey yok.','Matkabı bir kere kullanıp komşuya verecektim. Komşu da kurtuldu.','Balkonum aynı, hayallerim yeşil.','Mangalı almadım, komşunun kokusuyla idare ettim.','Çimler biçilmedi ama zaten çim de yok.'],
+  i:[['🌳','Zeytin Ağacı',3499],['🌷','Lale Soğanı Seti',249],['🔨','Akülü Matkap Seti',4299],['🧰','108 Parça Alet Çantası',2999],['🪚','Dekupaj Testere',3199],['🪜','Katlanır Merdiven',1899],['🌱','Sebze Fidesi Seti',199],['⛲','Bahçe Çeşmesi',8999],['🏡','Ahşap Bahçe Kulübesi',64999],['🔥','Kömürlü Mangal',3999],['⛱️','Bahçe Şemsiyesi',2799],['💧','Otomatik Sulama Sistemi',5499],['🪴','Dikey Bahçe Paneli',1499],['🪓','Balta',899],['🌻','Ayçiçeği Tohumu',79],['🛖','Kamelya',38999],['🚜','Çim Biçme Traktörü',89999],['🏊','Şişme Havuz',6999],['🪑','Bahçe Oturma Grubu',17999],['🐝','Arı Kovanı',2499]]},
+ {k:'seyahat',n:'Seyahat & Deneyim',h:176,v:['Hafta Sonu','5 Gün','1 Hafta','2 Hafta','Business Sınıfı'],m:[.5,.8,1,1.8,3.4],b:['Rüzgargülü','Atlasya','Dalgakıran'],
+  f:['Valiz hazırlama stresi yok','İzin almana gerek kalmaz','Jet lag yapmaz','Dönüşte kredi kartı ekstresi beklemez'],
+  r:['Valiz hazırlamadım, izin almadım, yorulmadım. Dinlendirici tatil.','Pasaport sırası yoktu çünkü ben de yoktum.','Fotoğraflarına baktım, gitmiş kadar oldum.','Dönüşte tatil dönüşü hüznü yaşamadım.','Uçak rötar yapmadı. Benim için.','Otel manzaralıymış, evim de fena değil.'],
+  i:[['✈️','Roma Uçak Bileti',12999],['🏨','Boğaz Manzaralı Otel',18999],['🚢','Akdeniz Cruise Turu',64999],['🎢','Tema Park Bileti',2499],['🎟️','Konser Bileti',1899],['🏕️','Glamping Kaçamağı',8999],['🎈','Kapadokya Balon Turu',7499],['🤿','Kaş Dalış Turu',5999],['🏔️','Kaçkar Yürüyüş Turu',11999],['🚄','Doğu Ekspresi Yolculuğu',9499],['🗼','Paris Kaçamağı',38999],['🏯','Japonya Turu',124999],['🐘','Afrika Safarisi',189999],['🧖','Termal Spa Paketi',6999],['🌋','İzlanda Turu',96999],['🏝️','Maldivler Tatili',219999],['🎭','Tiyatro Sezon Bileti',3499],['🪂','Ölüdeniz Yamaç Paraşütü',4999],['🚠','Uludağ Kayak Tatili',27999],['🛳️','Boğaz Tekne Turu',1499],['🗽','New York Turu',109999],['🌌','Kuzey Işıkları Turu',84999]]},
+ {k:'luks',n:'Abartı Reyonu',h:288,v:['Sade','Konforlu','Altın Detaylı','Kişiye Özel','Tek Üretim'],m:[1,1.2,1.5,2,3],b:['Atlasya','Lumora','Kuzgun'],
+  f:['Bakım masrafı yok','Vergisi, harcı, aidatı yok','Kıskanç akraba çekmez','Garajına, limanına, pistine gerek yok'],
+  r:['Bütçemi biraz aştı ama taksitsiz ödemedim.','Bakım masrafı gerçekten yok, tavsiye ederim.','Limanda yer bulamayacaktım zaten.','Akrabalar duymadı, borç isteyen olmadı.','Üç tane almadım, biri yazlık için.','Mahallede hava atamadım ama aidat da ödemiyorum.'],
+  i:[['🏎️','Spor Araba',7900000],['🛥️','40 Metre Yat',48000000],['🚁','Kişisel Helikopter',96000000],['💎','5 Karat Pırlanta',3400000],['🏝️','Özel Ada',215000000],['🚀','Yörünge Uçuş Bileti',18000000],['🏰','Loire Vadisi Şatosu',340000000],['🛩️','Özel Jet',890000000],['🎻','Antika Keman',12500000],['🐎','Yarış Atı',5600000],['☄️','Göktaşı Parçası',780000],['🗼','Deniz Feneri',26000000],['🚂','Vagon Ev',4300000],['🏟️','Mahalle Stadyumu',1200000000],['🏙️','Boğaz Manzaralı Yalı',2400000000],['🎡','Kişisel Dönme Dolap',64000000],['🚇','Tek Duraklı Metro Hattı',9800000000],['🗿','Bahçe İçin Dev Heykel',2900000],['🛰️','Kendi Uydun',410000000],['🏜️','Bir Parça Çöl',15000000]]}
+];
+const TAGS=['','','','Flaş','Son 2 ürün','Çok alınmayan','Yeni','Editör seçimi','Tükenmek üzere','Haftanın yıldızı'];
+const P=[];let G=0;
+CATS.forEach(c=>c.i.forEach(it=>{const g=G++;c.v.forEach((v,vi)=>{
+  let pr=it[2]*c.m[vi]*(.94+rnd()*.12); pr=pr>200?Math.round(pr/10)*10-1:Math.round(pr);
+  const disc=rnd()<.42?Math.round((10+rnd()*55)/5)*5:0;
+  P.push({id:P.length,g,vi,v,bn:it[1],c:c.k,cn:c.n,h:(c.h+vi*11+Math.floor(rnd()*14))%360,e:it[0],n:it[1]+' '+v,b:c.b[g%c.b.length],p:pr,
+    old:disc?Math.round(pr/(1-disc/100)/10)*10-1:0,disc,r:Math.round((3.9+rnd()*1.1)*10)/10,rv:Math.floor(12+rnd()*rnd()*9800),tag:pick(TAGS),o:rnd()});
+})}));
+const GEN=['Kargo hiç gelmedi. Tam beklediğim gibi.','Üçüncü kez almıyorum, yine çok memnunum.','Hesabıma dokunulmadı, ürüne de dokunamadım. Dengeli.','Kutu açılış videosu çekecektim, kutu yok. Video kısa oldu.','Annem yine mi kargo diye sordu, bu sefer gururla hayır dedim.','İade süreci çok kolaydı çünkü iade edecek bir şey yoktu.','Rengi fotoğraftakiyle aynı mı bilmiyorum, hiç görmedim.','Ay sonunda kart ekstrem bana teşekkür etti.','Kurye kapıya kadar geldi, bakıştık, gitti.','Evde yer kaplamıyor. Bu fiyata bulunmaz.','Arkadaşıma da almadım, çok sevindi.','Sepete atarken kalbim hızlandı, ödeme ekranında sakinleşti.','Paketleme özenliydi diyemem, paket yoktu.','Fiyat performans ürünü. Fiyat var, performans sınanmadı.','Maaş yatmadan sipariş verdim, maaş yatınca hâlâ duruyordu.','Site o kadar gerçekçi ki bir an korktum. Sonra ₺0 yazısını gördüm.','Kargo takibini dizi gibi izledim. Finali sürprizdi: yine gelmedi.','Garanti belgesi çıkmadı ama bozulma ihtimali de yok.','Eve gelen tek şey huzur oldu.','Banka aramadı, bu şüpheli işlem siz misiniz diye sormadı.','Gece 01.40 kararıydı. Sabah uyandım, pişmanlık yok.','Bunu almak için birikim yapmayı bıraktım, birikim yapmaya başladım.','Kapıcı paketin var demedi. Alıştık artık.','Kredi kartı limitim buna şahit olmadı.','İndirim kuponunu da kullandım, sıfırdan yüzde yirmi düştü.','Tahmini teslimat 45 saniyeydi, 45 saniye sonra hayatım aynıydı.','Satıcı çok ilgiliydi diyemem, satıcı da yok.'];
+const TPL=['{n} için üç gece düşündüm. Sonunda yine almadım, içim rahat.','Sepetimde {n} var diye bütün gün mutlu gezdim.','{n} geldi mi? Hayır. Mutlu muyum? Evet.','Herkes {n} alıyor diye ben de almadım.','{n} bakıp çıkacaktım, sipariş verip çıktım. Sonuç aynı.','İkinci {n} siparişim. İlki de gelmemişti, istikrarlı firma.','{n} favorilerimde üç aydır duruyordu. Artık siparişlerimde duruyor.','Bir {n} daha almadım, biri yedek dursun diye.','{n} ile ilgili tek şikayetim, şikayet edecek bir şey olmaması.','Eşime sürpriz {n} yapmadım. Çok şaşırmadı.','{n} fiyatını görünce buraya koştum.','Doğum günümde kendime {n} hediye etmedim.'];
+const END=['Tavsiye ederim.','Herkese almamasını öneririm.','Tekrar almam.','Beş yıldızı hak ediyor.','Satıcıya teşekkürler, her kimse.','Güle güle kullanmayın.','Yine gelsin, yine gelmesin.','Bu fiyata kaçmaz, kaçırdım.','Hayırlı olsun bana.','Almayan pişman olmaz.'];
+const MID=['Fena değil ama biraz daha gelmeyebilirdi.','Beklediğimden az heyecan verdi. Belki iki tane almamalıydım.','Kurye fazla hızlıydı, bekleyişin tadını çıkaramadım.','Üç yıldız, çünkü bir an gerçekten geleceğini sandım.','İdare eder. Almamak güzel ama almak da güzeldi sanki.','Ortalama bir almama deneyimi.'];
+const LOW=['Gerçekten gelmedi. Ne bekliyordum bilmiyorum.','Şaka sandım, ciddiymiş. Paket yok.','Açıklamayı okumadan sipariş verdim. Hata bende.','Kapıda bekledim. Çok bekledim.','Bir yıldız, çünkü canım gerçekten çekti.'];
+const NAMES=['Elif','Zeynep','Mert','Deniz','Selin','Arda','Ayşe','Can','Ece','Emre','Derya','Kaan','İrem','Onur','Melis','Tolga','Nazlı','Barış','Gizem','Umut','Sena','Yiğit','Buse','Cem','Aslı','Ozan','Ceren','Serkan','Damla','Furkan'];
+const AGO=['bugün','dün','2 gün önce','4 gün önce','1 hafta önce','2 hafta önce','3 hafta önce','1 ay önce','2 ay önce','3 ay önce'];
+const CITIES=['İstanbul','Ankara','İzmir','Bursa','Antalya','Eskişehir','Trabzon','Gaziantep','Adana','Diyarbakır','Kayseri','Muğla'];
+const SPEED={tavsan:['🐇','Tavşan kurye','45 saniyede kapında, elleri boş',45],standart:['🛵','Standart','Bir buçuk dakika, klasik bekleyiş',90],kaplumbaga:['🐢','Kaplumbağa','Üç dakika. Bekleyişin tadını çıkar',180]};
+const PAY={kart:['💳','Banka veya kredi kartı','Bilgileri gir, yine de çekilmesin'],hayal:['💭','Hayali kart','Limiti sonsuz, ekstresi yok'],monopoly:['🎩','Kutu oyunu parası','Bankadan 200 al, başlangıçtan geç'],dua:['🤲','Anne duası','Her yerde geçer'],sonra:['🗓️','Sonra hiç ödeme','Taksit sayısı: 0']};
+const STAGES=[[0,'Sipariş alındı'],[.14,'Hazırlanıyormuş gibi'],[.32,'Kargoya verilmedi'],[.52,'Kurye yolda'],[.86,'Kapında'],[1,'Teslim edilmedi']];
+
+/* ---------- durum ---------- */
+const LS={get(k,d){try{const v=localStorage.getItem('almadim_'+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem('almadim_'+k,JSON.stringify(v))}catch(e){}}};
+const S={cat:'hepsi',q:'',sort:'rec',favOnly:false,shown:24,cart:LS.get('cart',{}),favs:LS.get('favs',[]),orders:LS.get('orders',[]),recent:LS.get('recent',[]),pm:null,coupon:0,ccode:'',bonus:LS.get('bonus',0),badges:LS.get('badges',[]),notes:LS.get('notes',[]),drops:LS.get('drops',{}),w:LS.get('wheel',null),f:{min:'',max:'',brand:'',rate:0,disc:false},cartPing:Date.now()-60000,pings:0,step:0,view:'magaza',sel:null,form:{name:'',city:CITIES[0],speed:'tavsan',pay:'kart'},card:null,adT:0};
+const save=()=>{LS.set('cart',S.cart);LS.set('favs',S.favs);LS.set('orders',S.orders)};
+const cartItems=()=>Object.keys(S.cart).map(id=>({p:P[id],q:S.cart[id]})).filter(x=>x.p);
+const cartTotal=()=>cartItems().reduce((a,x)=>a+x.p.p*x.q,0);
+const saved=()=>S.orders.reduce((a,o)=>a+o.total,0);
+
+/* ---------- oyunlaştırma ---------- */
+const cp0=LS.get('coupon',null);if(cp0){S.coupon=cp0.pct;S.ccode=cp0.code}
+function applyDrop(p,pct){p.base=p.base||p.p;if(!p.old)p.old=p.base;p.p=Math.round(p.base*(1-pct/100));p.disc=Math.round((1-p.p/p.old)*100);p.drop=pct}
+Object.keys(S.drops).forEach(i=>{if(P[i])applyDrop(P[i],S.drops[i])});
+const LEVELS=[[0,'Çırak'],[5000,'Kalfa'],[50000,'Usta'],[500000,'Üstat'],[5000000,'Efsane']];
+const points=()=>Math.floor(saved()/10)+S.bonus;
+function level(){const pt=points();let i=0;LEVELS.forEach((l,k)=>{if(pt>=l[0])i=k});const nx=LEVELS[i+1];return{name:LEVELS[i][1],pt,next:nx,pct:nx?Math.min(100,(pt-LEVELS[i][0])/(nx[0]-LEVELS[i][0])*100):100}}
+const ocats=()=>{const s=new Set();S.orders.forEach(o=>o.items.forEach(i=>{if(P[i.id])s.add(P[i.id].c)}));return s};
+const BADGES=[
+ ['ilk','🥇','İlk almama','İlk siparişini ver',()=>S.orders.length>=1],
+ ['uc','🎯','Üçleme','3 sipariş gelmesin',()=>S.orders.length>=3],
+ ['on','🏆','Onluk','10 sipariş gelmesin',()=>S.orders.length>=10],
+ ['bin','💸','Binlik','Toplam ₺1.000 harcama',()=>saved()>=1000],
+ ['yuzbin','🏦','Yüz binlik','Toplam ₺100.000 harcama',()=>saved()>=100000],
+ ['milyon','👑','Milyoner olmayan','Toplam ₺1.000.000 harcama',()=>saved()>=1000000],
+ ['gece','🌙','Bir gecede milyon','Tek siparişte ₺1.000.000',()=>S.orders.some(o=>o.total>=1000000)],
+ ['abarti','🛥️','Abartı','Abartı Reyonundan alma',()=>ocats().has('luks')],
+ ['baykus','🦉','Gece kuşu','Gece 00.00 ile 05.00 arası sipariş',()=>S.orders.some(o=>new Date(o.at).getHours()<5)],
+ ['canavar','🛒','Sepet canavarı','Tek siparişte 10 ürün',()=>S.orders.some(o=>o.items.reduce((a,i)=>a+i.q,0)>=10)],
+ ['gurme','🍔','Gurme','Sıcak Sipariş ver, aç kal',()=>ocats().has('yemek')],
+ ['gezgin','✈️','Gezgin','Bir tatile gitme',()=>ocats().has('seyahat')],
+ ['kart','💳','Kart sahibi','Sahte kartla öde',()=>S.orders.some(o=>o.card)],
+ ['cark','🎡','Çarkçı','Çarkı bir kez çevir',()=>!!S.w],
+ ['fav','♥','Koleksiyoncu','10 ürünü favorile',()=>S.favs.length>=10],
+ ['tur','🧭','Reyon turu','8 farklı reyondan alma',()=>ocats().size>=8]
+];
+function addNote(t,pid,a){S.notes.unshift({t,ts:Date.now(),pid:pid==null?null:pid,a:a||'',r:false});S.notes=S.notes.slice(0,30);LS.set('notes',S.notes);renderHead()}
+function checkBadges(quiet){const nw=BADGES.filter(b=>b[4]()&&!S.badges.includes(b[0]));if(!nw.length)return;
+  S.badges=S.badges.concat(nw.map(b=>b[0]));LS.set('badges',S.badges);nw.forEach(b=>addNote('Yeni rozet: '+b[2]));
+  if(!quiet)setTimeout(()=>toast('Yeni rozet: '+nw[0][1]+' '+nw[0][2]+(nw.length>1?' ve '+(nw.length-1)+' rozet daha':'')),1500);
+  if(S.view==='siparisler')renderOrders()}
+function openNotes(){S.pm=null;const ago=ts=>{const m=Math.floor((Date.now()-ts)/60000);return m<1?'az önce':m<60?m+' dk önce':m<1440?Math.floor(m/60)+' sa önce':Math.floor(m/1440)+' gün önce'};
+  $('#veil').innerHTML=`<aside class="drawer" role="dialog" aria-modal="true" aria-label="Bildirimler"><div class="dhead"><h2>Bildirimler</h2><button class="x" data-act="close" aria-label="Kapat">×</button></div>
+   <div class="dbody">${S.notes.length?S.notes.map(n=>`<div class="line nt${n.r?'':' new'}"><div class="mid"><div>${esc(n.t)}</div><span class="rm">${ago(n.ts)}</span></div>${n.pid!=null&&P[n.pid]?`<button class="btn" data-act="open" data-id="${n.pid}">Bak</button>`:n.a==='cart'?'<button class="btn" data-act="cart">Sepet</button>':''}</div>`).join(''):'<div class="empty">Henüz bildirim yok. Bir ürünü favorine ekle, fiyatı düşünce burada haber veririz.</div>'}</div>
+   <div class="dfoot"><button class="btn block" data-act="noteclear">Bildirimleri temizle</button></div></aside>`;
+  $('#veil').hidden=false;S.notes.forEach(n=>{n.r=true});LS.set('notes',S.notes);renderHead()}
+function dropTick(){const c=S.favs.map(i=>P[i]).filter(p=>p&&(S.drops[p.id]||0)<40);if(!c.length)return;
+  const p=c[Math.floor(Math.random()*c.length)],pct=Math.min(45,(S.drops[p.id]||0)+5+Math.floor(Math.random()*4)*5);
+  S.drops[p.id]=pct;LS.set('drops',S.drops);applyDrop(p,pct);
+  addNote(p.n+' fiyatı düştü: '+fmt(p.p)+'. Takibe aldığından beri %'+pct+' indi.',p.id);toast('Fiyat alarmı: '+p.n+' şimdi '+fmt(p.p));
+  if(S.view==='magaza'&&$('#veil').hidden)renderGrid()}
+setInterval(()=>{if(Math.random()<.6)dropTick()},70000);
+function cartPing(){const it=cartItems();if(!it.length||!$('#veil').hidden||S.pings>=3||Date.now()-S.cartPing<90000)return;S.cartPing=Date.now();S.pings++;
+  const n=it.reduce((a,x)=>a+x.q,0);addNote('Sepetinde '+n+' ürün bekliyor: '+fmt(cartTotal())+'. Çekilecek tutar ₺0.',null,'cart');toast('Sepetinde '+n+' ürün seni bekliyor.')}
+setInterval(cartPing,30000);
+const WHEEL=[['%10 kupon',10,0],['Boş',0,0],['%30 kupon',30,0],['+500 puan',0,500],['%20 kupon',20,0],['Bedava kargo',0,0],['%50 kupon',50,0],['+2.000 puan',0,2000]];
+const today=()=>new Date().toDateString();
+function wheelMsg(i){const w=WHEEL[i];return w[1]?'%'+w[1]+' kupon çıktı ve sepetine uygulandı. Kod: CARK'+w[1]:w[2]?w[2].toLocaleString('tr-TR')+' Almadım Puan kazandın.':i===5?'Bedava kargo çıktı. Zaten bedavaydı ama olsun.':'Boş çıktı. Yine de hiçbir şey kaybetmedin.'}
+function openWheel(){S.pm=null;const done=S.w&&S.w.day===today(),col=['--pink','--surface','--sun','--blue'],fg=['--on-accent','--ink','--on-sun','--on-accent'];
+  $('#veil').innerHTML=`<div class="modal small" role="dialog" aria-modal="true" aria-label="Günlük çark"><button class="x" data-act="close" aria-label="Kapat">×</button>
+   <div class="wbox"><span class="eyebrow">Günde bir kez</span><h2>Almama çarkı</h2>
+   <div class="wwrap"><span class="wpin"></span><div class="wheel" id="wheel" style="transform:rotate(${done?360-(S.w.idx*45+22.5):0}deg);background:conic-gradient(${WHEEL.map((w,i)=>`var(${col[i%4]}) ${i*45}deg ${i*45+45}deg`).join(',')})">
+    ${WHEEL.map((w,i)=>`<span class="wl" style="transform:rotate(${i*45+22.5}deg);color:var(${fg[i%4]})"><b>${w[0]}</b></span>`).join('')}</div></div>
+   <p class="wres" id="wres">${done?wheelMsg(S.w.idx)+' Yarın yine gel.':'Kupon, puan ya da koca bir hiç. Hepsi aynı fiyata.'}</p>
+   <button class="btn pri block" id="wbtn" data-act="spin"${done?' disabled':''}>${done?'Bugünkü hakkın bitti':'Çevir'}</button></div></div>`;
+  $('#veil').hidden=false}
+function spin(){const i=Math.floor(Math.random()*8),w=WHEEL[i];S.w={day:today(),idx:i};LS.set('wheel',S.w);const b=$('#wbtn');b.disabled=true;b.textContent='Dönüyor…';
+  $('#wheel').style.transform=`rotate(${360*6+360-(i*45+22.5)}deg)`;
+  setTimeout(()=>{if(w[1]){S.coupon=w[1];S.ccode='CARK'+w[1];LS.set('coupon',{pct:w[1],code:S.ccode})}if(w[2]){S.bonus+=w[2];LS.set('bonus',S.bonus)}
+   addNote('Çark: '+wheelMsg(i));const r=$('#wres');if(r){r.textContent=wheelMsg(i);$('#wbtn').textContent='Yarın yine gel'}if(w[1]||w[2])confetti();checkBadges()},
+   matchMedia('(prefers-reduced-motion: reduce)').matches?100:4400)}
+function openShare(id){S.pm=null;const all=id==='all',o=all?null:S.orders.find(x=>x.id===id);if(!all&&!o)return;
+  const tot=all?saved():o.total,items=all?S.orders.flatMap(x=>x.items):o.items,n=items.reduce((a,i)=>a+i.q,0),em=items.map(i=>P[i.id]?P[i.id].e:'').filter(Boolean).slice(0,9).join(' '),amt=fmt(tot),when=all?'Bugüne kadar':'Bugün';
+  S.shareTxt=when+' '+amt+' harcamadım. '+n+' ürün sipariş ettim, hiçbiri gelmedi, kartımdan ₺0 çekildi. #almadım';
+  $('#veil').innerHTML=`<div class="modal small" role="dialog" aria-modal="true" aria-label="Tasarruf kartı"><button class="x" data-act="close" aria-label="Kapat">×</button><div class="wbox">
+   <span class="eyebrow">Tasarruf kartı</span>
+   <div class="scard"><div class="ccrow" style="align-items:center"><b class="slogo">almadım<i>.</i></b><span class="mono">${new Date(all?Date.now():o.at).toLocaleDateString('tr-TR')}</span></div>
+    <div><span class="sk">${when}</span><div class="samt" style="font-size:${amt.length>13?30:amt.length>9?42:58}px">${amt}</div><span class="sh">harcamadım.</span></div>
+    <div class="sem">${em}</div>
+    <div class="sgrid"><div><b>${n}</b>ürün</div><div><b>0</b>paket</div><div><b>₺0</b>ödeme</div><div><b>${Math.floor(tot/20).toLocaleString('tr-TR')}</b>simit</div></div>
+    <div class="ccrow"><span>Seviye: ${level().name}</span><span class="mono">${all?S.orders.length+' sipariş':o.id}</span></div></div>
+   <p class="wres">Ekran görüntüsünü al, istediğin yerde paylaş.</p>
+   <button class="btn ink block" data-act="copy">Paylaşım metnini kopyala</button><div class="note" id="sharetxt" hidden style="user-select:all"></div></div></div>`;
+  $('#veil').hidden=false}
+function copyShare(){const fb=()=>{const e=$('#sharetxt');e.textContent=S.shareTxt;e.hidden=false;toast('Kopyalanamadı. Metni aşağıdan seçip kopyalayabilirsin.')};
+  try{navigator.clipboard.writeText(S.shareTxt).then(()=>toast('Paylaşım metni kopyalandı.')).catch(fb)}catch(e){fb()}}
+function renderBrands(){const bs=[...new Set(P.filter(p=>S.cat==='hepsi'||p.c===S.cat).map(p=>p.b))].sort((a,b)=>a.localeCompare(b,'tr'));
+  $('#f-brand').innerHTML='<option value="">Tüm markalar</option>'+bs.map(b=>`<option${b===S.f.brand?' selected':''}>${esc(b)}</option>`).join('')}
+
+/* ---------- mağaza ---------- */
+function filtered(){
+  const q=S.q.trim().toLocaleLowerCase('tr');
+  const f=S.f,mn=+f.min||0,mx=+f.max||Infinity;
+  let a=P.filter(p=>(S.cat==='hepsi'||p.c===S.cat)&&(!S.favOnly||S.favs.includes(p.id))&&p.p>=mn&&p.p<=mx&&(!f.brand||p.b===f.brand)&&p.r>=f.rate&&(!f.disc||p.disc>0)&&(!q||(p.n+' '+p.b+' '+p.cn).toLocaleLowerCase('tr').includes(q)));
+  const srt={rec:(x,y)=>x.o-y.o,asc:(x,y)=>x.p-y.p,desc:(x,y)=>y.p-x.p,disc:(x,y)=>y.disc-x.disc,pop:(x,y)=>y.rv-x.rv,rate:(x,y)=>y.r-x.r}[S.sort];
+  return a.sort(srt);
+}
+function card(p){return `<article class="card" style="--h:${p.h}">
+  <button class="tile" data-act="open" data-id="${p.id}" aria-label="${esc(p.n)} ayrıntıları"><span>${p.e}</span></button>
+  ${p.tag?`<span class="tag">${p.tag}</span>`:''}
+  <button class="fav" data-act="fav" data-id="${p.id}" aria-pressed="${S.favs.includes(p.id)}" aria-label="Favorilere ekle">♥</button>
+  <div class="info"><span class="eyebrow">${esc(p.b)}</span>
+   <button class="name" data-act="open" data-id="${p.id}">${esc(p.n)}</button>
+   <span class="rate"><b>★ ${p.r.toFixed(1)}</b> · ${p.rv.toLocaleString('tr-TR')} kişi almadı</span>
+   <div class="price"><b>${fmt(p.p)}</b>${p.disc?`<s>${fmt(p.old)}</s><em>-%${p.disc}</em>`:''}</div>
+   <button class="add" data-act="add" data-id="${p.id}">Sepete at</button></div></article>`}
+function renderChips(){
+  const all=[{k:'hepsi',n:'Hepsi',c:P.length}].concat(CATS.map(c=>({k:c.k,n:c.n,c:P.filter(p=>p.c===c.k).length})));
+  $('#chips').innerHTML=all.map(c=>`<button class="chip" data-act="cat" data-k="${c.k}" aria-pressed="${S.cat===c.k}">${c.n}<small>${c.c}</small></button>`).join('');
+}
+function renderGrid(){
+  const a=filtered();
+  $('#count').textContent=a.length.toLocaleString('tr-TR')+' ürün, hiçbiri gelmeyecek';
+  $('#grid').innerHTML=a.length?a.slice(0,S.shown).map(card).join(''):`<div class="empty" style="grid-column:1/-1">Bu aramaya uyan ürün yok. Başka bir kelime dene ya da filtreleri kaldır.</div>`;
+  $('#more').hidden=a.length<=S.shown;
+  $('#favf').setAttribute('aria-pressed',S.favOnly);$('#f-disc').setAttribute('aria-pressed',S.f.disc);
+  $('#f-clear').hidden=!(S.f.min||S.f.max||S.f.brand||S.f.rate||S.f.disc);
+}
+function renderHead(){
+  $('#cc').textContent=cartItems().reduce((a,x)=>a+x.q,0);const un=S.notes.filter(n=>!n.r).length;$('#nc').textContent=un;$('#nc').hidden=!un;
+  $('#s-saved').textContent=fmt(saved()); $('#s-orders').textContent=S.orders.length; $('#s-cat').textContent=P.length+' ürün';
+  ['magaza','siparisler','hakkinda'].forEach(v=>{$('#nav-'+v).setAttribute('aria-current',S.view===v);$('#v-'+v).hidden=S.view!==v});
+}
+const dealP=(()=>{const d=P.filter(p=>p.disc>=40&&p.c!=='luks');return d[Math.floor(Date.now()/864e5)%d.length]})();
+function renderDeal(){
+  $('#deal').innerHTML=`<div class="row"><span class="eyebrow">Günün almama fırsatı</span><span class="count" id="cd">--:--:--</span></div>
+   <div class="big">${dealP.e}</div><span class="eyebrow">${esc(dealP.b)}</span><h3>${esc(dealP.n)}</h3>
+   <div class="row"><div class="price"><b style="font-size:26px">${fmt(dealP.p)}</b><s style="color:inherit;opacity:.7">${fmt(dealP.old)}</s></div>
+   <button class="btn ink" data-act="add" data-id="${dealP.id}">Sepete at</button></div>`;
+}
+function tick(){const el=$('#cd');if(el){const n=new Date(),e=new Date(n);e.setHours(24,0,0,0);let s=Math.floor((e-n)/1000);const h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0');el.textContent=h+':'+m+':'+String(s%60).padStart(2,'0')}
+  if(S.view==='siparisler')renderTrack();tickModal()}
+
+/* ---------- ürün sayfası ---------- */
+const rng=s=>n=>{s=(s*9301+49297)%233280;return Math.floor(s/233280*n)};
+function reviewsFor(p){
+  const r=rng(p.id*131+7),cat=CATS.find(c=>c.k===p.c),used={},out=[];
+  const bag=p.r>=4.6?[5,5,5,5,5,4,4,5,3,5]:p.r>=4.2?[5,5,4,5,4,3,5,4,1,5]:[5,4,3,4,5,2,3,4,1,5];
+  for(let i=0;i<18;i++){
+    const s=bag[r(bag.length)],pool=s<=2?LOW:s===3?MID:[cat.r,TPL,GEN,cat.r,GEN][i%5];
+    let t,k=0;do{t=pool[r(pool.length)]}while(used[t]&&++k<10);if(used[t])continue;used[t]=1;
+    t=t.replace('{n}',p.bn);if(s>=4&&r(3)===0)t+=' '+END[r(END.length)];
+    out.push({w:NAMES[r(NAMES.length)]+' '+'ABCDEGHKMSTYZ'[r(13)]+'.',s,t,d:AGO[Math.min(9,Math.floor(i/2)+r(2))],h:r(640),ver:r(6)>0,v:CATS.find(c=>c.k===p.c).v[r(5)]});
+  }
+  return out;
+}
+const mini=p=>`<button class="mc" data-act="open" data-id="${p.id}" style="--h:${p.h}"><span class="mt">${p.e}</span><span class="mi"><span>${esc(p.n)}</span><b class="mono">${fmt(p.p)}</b>${p.disc?`<em class="mono">-%${p.disc}</em>`:''}</span></button>`;
+const revHTML=v=>`<div class="rev"><div class="rh"><b>${v.w}</b><span class="st">${'★'.repeat(v.s)}<i>${'★'.repeat(5-v.s)}</i></span></div>
+  <div class="rm">${v.d} · ${esc(v.v)}${v.ver?' · <span class="ver">Doğrulanmış almama</span>':''}</div>${esc(v.t)}<div class="rm">${v.h} kişi bunu faydalı bulmadı</div></div>`;
+const THUMB=[['none',0],['rotate(-18deg) scale(1.12)',24],['scaleX(-1) rotate(10deg)',-24],['scale(1.6) translate(10%,8%)',48]];
+function openProduct(id){
+  const p=P[id],r=rng(id*17+5),cat=CATS.find(c=>c.k===p.c);
+  S.recent=[id].concat(S.recent.filter(x=>P[x]&&P[x].g!==p.g)).slice(0,14);LS.set('recent',S.recent);
+  const sib=P.filter(x=>x.g===p.g),same=P.filter(x=>x.c===p.c&&x.g!==p.g);
+  const bun=[same[r(same.length)],same[r(same.length)]].filter((x,i,a)=>x&&a.findIndex(y=>y.g===x.g)===i);
+  const sim=[];for(let i=0;i<40&&sim.length<10;i++){const x=same[r(same.length)];if(x&&!sim.some(y=>y.g===x.g))sim.push(x)}
+  const revs=reviewsFor(p),stock=1+id%6,a5=Math.round((p.r-3)/2*86),a4=Math.round((100-a5)*.55),a3=Math.round((100-a5-a4)*.5),a2=Math.round((100-a5-a4-a3)*.4),a1=100-a5-a4-a3-a2;
+  S.pm={tk:0,id,qty:1,rs:5,revs,end:Date.now()+(180+id*37%720)*1000,pv:8+id%60};
+  const bt=p.p+bun.reduce((a,x)=>a+x.p,0);
+  $('#veil').innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(p.n)}" style="--h:${p.h}">
+   <button class="x" data-act="close" aria-label="Kapat">×</button>
+   <div class="ptop">
+    <div class="gal"><div class="tile" id="pmain"><span>${p.e}</span>${p.disc?`<span class="tag" style="font-size:13px;padding:7px 9px">-%${p.disc}</span>`:''}</div>
+     <div class="thumbs">${THUMB.map((t,i)=>`<button data-act="thumb" data-i="${i}" aria-pressed="${i===0}" aria-label="Görsel ${i+1}" style="--h:${(p.h+t[1]+360)%360}"><span style="transform:${t[0]}">${p.e}</span></button>`).join('')}</div></div>
+    <div class="pd"><span class="eyebrow">${esc(p.b)} · ${esc(p.cn)}</span><h2>${esc(p.n)}</h2>
+     <span class="rate"><b>★ ${p.r.toFixed(1)}</b> · ${p.rv.toLocaleString('tr-TR')} kişi almadı · ${Math.floor(p.rv/7)} soru cevapsız</span>
+     <div class="live"><span class="dot"></span><span><b id="pv">${S.pm.pv}</b> kişi şu an bu ürüne bakıyor. Son 24 saatte ${(40+id*13%900).toLocaleString('tr-TR')} kişi sepete attı.</span></div>
+     <div class="price"><b style="font-size:30px">${fmt(p.p)}</b>${p.disc?`<s>${fmt(p.old)}</s><em>-%${p.disc}</em>`:''}</div>
+     <div class="flash"><span>Bu fiyat <b class="mono" id="pcd">--:--</b> daha geçerli</span><span class="pill">Son 30 günün en düşüğü</span></div>
+     <div><span class="legend">Seçenek</span><div class="vars">${sib.map(x=>`<button class="chip" data-act="open" data-id="${x.id}" aria-pressed="${x.id===id}">${esc(x.v)}</button>`).join('')}</div></div>
+     <div class="stock"><div class="sum"><span>Stokta son <b>${stock}</b> ürün</span><span>${100-stock*4}% tükendi</span></div><div class="sbar"><i style="width:${100-stock*4}%"></i></div></div>
+     <div class="buy"><div class="qty big"><button data-act="pq" data-d="-1" aria-label="Azalt">−</button><span id="pq">1</span><button data-act="pq" data-d="1" aria-label="Artır">+</button></div>
+      <button class="btn pri" data-act="addq" style="flex:1">Sepete at</button><button class="btn" data-act="fav" data-id="${p.id}" aria-pressed="${S.favs.includes(p.id)}" aria-label="Favorilere ekle">♥</button></div>
+     <ul class="perks">
+      <li><b>12 taksit × ${fmt(p.p/12)}</b> · faiz ₺0 · ödeme ₺0</li>
+      <li><b>Şimdi sipariş ver</b>, 45 saniyede kapında. Elleri boş.</li>
+      <li><b>${Math.round(p.p/10).toLocaleString('tr-TR')} Almadım Puan</b> kazanmıyorsun</li>
+      <li><b>Ücretsiz iade</b>, iade edecek bir şey çıkarsa</li>
+      <li><b>Fiyat alarmı:</b> ${p.drop?'takibe aldığından beri %'+p.drop+' düştü':'favorine ekle, fiyatı düşünce haber verelim'}</li></ul>
+     <div><span class="legend">Öne çıkanlar</span><ul class="feat">${cat.f.map(f=>`<li>${f}</li>`).join('')}</ul></div>
+    </div></div>
+   ${bun.length?`<section class="psec"><h3>Birlikte alınmayanlar</h3><div class="bundle">${[p].concat(bun).map((x,i)=>(i?'<span class="plus">+</span>':'')+mini(x)).join('')}
+     <div class="btot"><span class="eyebrow">Üçü birden</span><b class="mono">${fmt(bt)}</b><span class="rm">Kartından çekilecek: ₺0</span><button class="btn ink" data-act="bundle" data-ids="${[p].concat(bun).map(x=>x.id).join(',')}">Hepsini sepete at</button></div></div></section>`:''}
+   <section class="psec"><h3>Almayanların değerlendirmeleri</h3><div class="rsum">
+     <div class="score"><b>${p.r.toFixed(1)}</b><span class="st">★★★★★</span><span class="rm">${p.rv.toLocaleString('tr-TR')} değerlendirme</span>
+      <div class="bars">${[a5,a4,a3,a2,a1].map((v,i)=>`<div><span class="mono">${5-i}★</span><span class="bt"><i style="width:${v}%"></i></span><span class="mono">%${v}</span></div>`).join('')}</div>
+      <div class="rm">Yorumların tamamı uydurmadır, ürün gibi.</div></div>
+     <div><div class="revs" id="revlist">${revs.slice(0,5).map(revHTML).join('')}</div><button class="btn" id="morerev" data-act="morerev" style="margin-top:10px">Daha fazla yorum göster</button></div></div></section>
+   <section class="psec"><h3>Buna bakanlar şunları da almadı</h3><div class="hs">${sim.map(mini).join('')}</div></section>
+  </div>`;
+  $('#veil').hidden=false;$('#veil').scrollTop=0;tickModal();
+}
+function tickModal(){
+  const m=S.pm,el=$('#pcd');if(!m||!el)return;
+  let s=Math.ceil((m.end-Date.now())/1000);if(s<=0){m.end=Date.now()+600000;s=600;toast('Süre doldu, biz de uzattık. Acele etme, zaten almıyorsun.')}
+  el.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+  if(++m.tk%7===0){m.pv=Math.max(3,m.pv+Math.floor(Math.random()*7)-3);$('#pv').textContent=m.pv}
+}
+function renderStrips(){
+  const d=P.filter(p=>p.disc>=50&&p.c!=='luks'),day=Math.floor(Date.now()/864e5),fl=[];
+  for(let i=0;i<14;i++){const x=d[(day*31+i*97)%d.length];if(!fl.some(y=>y.g===x.g))fl.push(x)}
+  const rc=S.recent.map(i=>P[i]).filter(Boolean);
+  $('#strips').innerHTML=`<div class="shead"><h2>Flaş almama fırsatları</h2><span class="rm">Yarısından ucuza alınmayanlar, gece yarısına kadar</span></div><div class="hs">${fl.map(mini).join('')}</div>`
+   +(rc.length?`<div class="shead"><h2>Son baktıkların</h2><span class="rm">Aklın bunlarda kaldı</span></div><div class="hs">${rc.map(mini).join('')}</div>`:'');
+}
+
+/* ---------- sepet ve ödeme ---------- */
+function openCart(step){S.pm=null;S.step=step||0;renderCart();$('#veil').hidden=false}
+function renderCart(){
+  const it=cartItems(),sub=cartTotal(),dis=sub*S.coupon/100,tot=sub-dis;
+  const steps=`<div class="steps"><span class="${S.step>=0?'on':''}">1 Sepet</span><span class="${S.step>=1?'on':''}">2 Teslimat</span><span class="${S.step>=2?'on':''}">3 Ödememe</span></div>`;
+  let body='',foot='';
+  if(!it.length){body=`<div class="empty">Sepetin boş. Mağazadan gözüne kestirdiğin her şeyi at, fiyatına bakmana gerek yok.</div>`;foot=`<button class="btn ink block" data-act="close">Mağazaya dön</button>`}
+  else if(S.step===0){
+    body=it.map(x=>`<div class="line" style="--h:${x.p.h}"><div class="mini">${x.p.e}</div><div class="mid"><div>${esc(x.p.n)}</div><span class="mono" style="font-size:12px;color:var(--muted)">${fmt(x.p.p)}</span></div>
+      <div class="qty"><button data-act="dec" data-id="${x.p.id}" aria-label="Azalt">−</button><span>${x.q}</span><button data-act="inc" data-id="${x.p.id}" aria-label="Artır">+</button></div></div>`).join('')
+      +`<div class="coupon"><input id="coupon" placeholder="Kupon: DOPAMIN" aria-label="Kupon kodu" value="${S.coupon?esc(S.ccode):''}"><button class="btn" data-act="coupon">Uygula</button></div>`;
+    foot=`<div class="sum"><span>Ara toplam</span><span>${fmt(sub)}</span></div>${S.coupon?`<div class="sum"><span>Kupon -%${S.coupon}</span><span>-${fmt(dis)}</span></div>`:''}<div class="sum"><span>Kargo</span><span class="zero">₺0</span></div>
+      <div class="sum tot"><span>Toplam</span><span>${fmt(tot)}</span></div><div class="sum"><span>Kartından çekilecek</span><span class="zero">₺0</span></div>
+      <button class="btn pri block" data-act="step" data-s="1">Teslimata geç</button>`;
+  } else if(S.step===1){
+    body=`<div class="field"><label for="co-name">Kuryenin sesleneceği isim</label><input id="co-name" maxlength="24" placeholder="Takma ad yeter" value="${esc(S.form.name)}"></div>
+     <div class="field"><label for="co-city">Şehir</label><select id="co-city">${CITIES.map(c=>`<option${c===S.form.city?' selected':''}>${c}</option>`).join('')}</select></div>
+     <div class="note">Gerçek adres yazmana gerek yok. Zaten kimse gelmeyecek, yazdıkların da bu tarayıcıdan çıkmıyor.</div>
+     <span class="legend">Teslimat hızı</span>
+     ${Object.keys(SPEED).map(k=>`<label class="opt"><input type="radio" name="speed" id="sp-${k}" value="${k}"${S.form.speed===k?' checked':''}><span><b>${SPEED[k][1]}</b><small>${SPEED[k][2]}</small></span><i>${SPEED[k][0]}</i></label>`).join('')}`;
+    foot=`<button class="btn pri block" data-act="step" data-s="2">Ödememeye geç</button><button class="btn block" data-act="step" data-s="0">Sepete dön</button>`;
+  } else if(S.step===2){
+    if(!S.card)S.card=fakeCard();const c=S.card;
+    body=`<span class="legend">Nasıl ödemeyeceksin?</span>
+     ${Object.keys(PAY).map(k=>`<label class="opt"><input type="radio" name="pay" id="pay-${k}" value="${k}"${S.form.pay===k?' checked':''}><span><b>${PAY[k][1]}</b><small>${PAY[k][2]}</small></span><i>${PAY[k][0]}</i></label>`).join('')}
+     <div id="cardform"${S.form.pay==='kart'?'':' hidden'}>
+      <div class="ccwrap"><div class="cc" id="cc"><div class="ccf"><div class="ccrow" style="align-items:center"><span class="chipm"></span><b>almadım<i>.</i> kart</b></div>
+        <div class="ccno mono" id="ccv-no">${grp(c.no)}</div>
+        <div class="ccrow"><span><small>KART SAHİBİ</small><span id="ccv-name">${esc(c.name)}</span></span><span style="flex:none"><small>SON KULLANMA</small><span class="mono" id="ccv-exp">${esc(c.exp)}</span></span></div></div>
+       <div class="ccb"><div class="stripe"></div><div class="sig"><span>CVV</span><b class="mono" id="ccv-cvv">${esc(c.cvv)}</b></div><small>Bu kart hiçbir yerde geçmez. En güzel yanı bu.</small></div></div></div>
+      <button class="btn block" data-act="fake">Rastgele sahte kart üret</button>
+      <div class="field"><label for="hk-no">Kart numarası</label><input class="mono" id="hk-no" inputmode="numeric" autocomplete="off" maxlength="19" placeholder="9000 0000 0000 0000" value="${grp(c.no)}"></div>
+      <div class="field"><label for="hk-name">Kart üzerindeki isim</label><input id="hk-name" autocomplete="off" maxlength="26" value="${esc(c.name)}"></div>
+      <div class="f2"><div class="field"><label for="hk-exp">Son kullanma</label><input class="mono" id="hk-exp" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="AA/YY" value="${esc(c.exp)}"></div>
+       <div class="field"><label for="hk-cvv">CVV</label><input class="mono" id="hk-cvv" inputmode="numeric" autocomplete="off" maxlength="3" placeholder="000" value="${esc(c.cvv)}"></div></div>
+      <div class="field"><label for="hk-tak">Taksit</label><select id="hk-tak">${[1,3,6,9,12].map(n=>`<option value="${n}"${+c.tak===n?' selected':''}>${n===1?'Tek çekim, o da çekilmiyor':n+' taksit × '+fmt(tot/n)+' · faiz ₺0'}</option>`).join('')}</select></div>
+      <div class="note"><b>Gerçek kart numaranı yazma.</b> Sahte kart hazır geliyor. Buraya yazılanlar kaydedilmez, hiçbir yere gönderilmez. Gerçek karta benzeyen bir numara girersen silip sahtesini koyarız.</div>
+     </div>
+     <div class="note">Hangi yöntemi seçersen seç, çekilen tutar ₺0.</div>`;
+    foot=`<div class="sum tot"><span>Almadığın toplam</span><span>${fmt(tot)}</span></div><div class="sum"><span>Kartından çekilecek</span><span class="zero">₺0</span></div>
+     <button class="btn pri block" data-act="order">Siparişi ver, parayı verme</button><button class="btn block" data-act="step" data-s="1">Geri</button>`;
+  } else {
+    body=`<div class="bank"><span class="eyebrow">Hayal Bankası · 3D Güvensiz Ödeme</span><h3>Onay kodu</h3>
+      <p>Sonu <b class="mono">${S.card.no.slice(-4)}</b> ile biten kartından <b>${fmt(tot)}</b> çekilmeyecek. Telefonuna gelmeyen 6 haneli kodu senin yerine biz yazıyoruz.</p>
+      <input class="otp mono" id="otp" readonly aria-label="Onay kodu" value="">
+      <div class="sum"><span>İşyeri</span><span>ALMADIM. SAHTE MAĞAZA</span></div><div class="sum"><span>Taksit</span><span>${+S.card.tak===1?'Tek çekim':S.card.tak+' × '+fmt(tot/S.card.tak)}</span></div>
+      <div class="sum"><span>Çekilecek tutar</span><span class="zero">₺0</span></div></div>
+     <div class="note">Bu ekran bir banka sayfası değildir. Hayal Bankası diye bir banka yok.</div>`;
+    foot=`<button class="btn pri block" id="okbtn" data-act="confirm" disabled>Kod bekleniyor</button><button class="btn block" data-act="step" data-s="2">Geri</button>`;
+  }
+  $('#veil').innerHTML=`<aside class="drawer" role="dialog" aria-modal="true" aria-label="Sepet"><div class="dhead"><h2>${['Sepetin','Teslimat','Ödememe','Onay'][it.length?S.step:0]}</h2><button class="x" data-act="close" aria-label="Kapat">×</button></div>
+   <div class="dbody">${it.length?steps:''}${body}</div><div class="dfoot">${foot}</div></aside>`;
+}
+const luhn=d=>{let t=0;for(let i=0;i<d.length;i++){let n=+d[d.length-1-i];if(i%2){n*=2;if(n>9)n-=9}t+=n}return t%10===0};
+const grp=d=>d.replace(/(.{4})/g,'$1 ').trim();
+function fakeCard(){let d='9';for(let i=0;i<15;i++)d+=Math.floor(Math.random()*10);if(luhn(d))d=d.slice(0,15)+((+d[15]+1)%10);
+  return{no:d,name:(S.form.name||'Sevgili Almayan').toLocaleUpperCase('tr'),exp:String(1+Math.floor(Math.random()*12)).padStart(2,'0')+'/'+(29+Math.floor(Math.random()*6)),cvv:String(100+Math.floor(Math.random()*900)),tak:(S.card&&S.card.tak)||1}}
+function cardInput(t){const c=S.card;if(!c)return;
+  if(t.id==='hk-no'){let d=t.value.replace(/\D/g,'').slice(0,16);if(d.length===16&&luhn(d)){d=fakeCard().no;toast('Bu numara gerçek bir karta benziyordu. Sildik, yerine sahtesini koyduk.')}c.no=d;t.value=grp(d);$('#ccv-no').textContent=grp(d.padEnd(16,'•'))}
+  else if(t.id==='hk-name'){c.name=t.value.toLocaleUpperCase('tr');$('#ccv-name').textContent=c.name||'AD SOYAD'}
+  else if(t.id==='hk-exp'){let d=t.value.replace(/\D/g,'').slice(0,4);c.exp=d.length>2?d.slice(0,2)+'/'+d.slice(2):d;t.value=c.exp;$('#ccv-exp').textContent=c.exp||'AA/YY'}
+  else if(t.id==='hk-cvv'){c.cvv=t.value.replace(/\D/g,'').slice(0,3);t.value=c.cvv;$('#ccv-cvv').textContent=c.cvv}
+  else if(t.id==='hk-tak')c.tak=+t.value}
+function startOtp(){const code=String(100000+Math.floor(Math.random()*900000));let i=0;const iv=setInterval(()=>{const el=$('#otp');if(!el){clearInterval(iv);return}
+  el.value=code.slice(0,++i);if(i>=6){clearInterval(iv);const b=$('#okbtn');b.disabled=false;b.textContent='Onayla ve ödeme'}},330)}
+function readForm(){const n=$('#co-name');if(n){S.form.name=n.value.trim();S.form.city=$('#co-city').value;const s=document.querySelector('input[name=speed]:checked');if(s)S.form.speed=s.value}
+  const p=document.querySelector('input[name=pay]:checked');if(p)S.form.pay=p.value}
+function placeOrder(){
+  readForm();const it=cartItems();if(!it.length)return;const sub=cartTotal();
+  const o={id:'ALM-'+Date.now().toString(36).toUpperCase().slice(-6),at:Date.now(),dur:SPEED[S.form.speed][3]*1000,speed:S.form.speed,pay:S.form.pay,name:S.form.name||'Sevgili almayan',city:S.form.city,
+    card:S.form.pay==='kart'&&S.card?{l4:S.card.no.slice(-4),tak:+S.card.tak}:null,items:it.map(x=>({id:x.p.id,q:x.q})),total:Math.round(sub*(1-S.coupon/100))};
+  S.orders.unshift(o);S.card=null;S.cart={};S.coupon=0;S.ccode='';LS.set('coupon',null);S.sel=o.id;save();closeVeil();go('siparisler');confetti();toast(fmt(o.total)+' cebinde kaldı. Kurye yola çıkmak üzere.');checkBadges();
+}
+
+/* ---------- siparişler ---------- */
+const prog=o=>Math.min(1,(Date.now()-o.at)/o.dur);
+function renderOrders(){
+  const t=saved(),n=S.orders.reduce((a,o)=>a+o.items.reduce((b,i)=>b+i.q,0),0);
+  $('#ostats').innerHTML=`<div><span class="eyebrow">Cebinde kalan</span><b>${fmt(t)}</b></div><div><span class="eyebrow">Sipariş</span><b>${S.orders.length}</b></div><div><span class="eyebrow">Almadığın ürün</span><b>${n}</b></div>
+   <div><span class="eyebrow">Simit karşılığı</span><b>${Math.floor(t/20).toLocaleString('tr-TR')}</b></div><div><span class="eyebrow">Sinema bileti</span><b>${Math.floor(t/250).toLocaleString('tr-TR')}</b></div>`;
+  const lv=level();
+  $('#profile').innerHTML=`<div class="prof"><div class="lv"><span class="eyebrow">Almayan seviyesi</span><h2>${lv.name}</h2><div class="sbar"><i style="width:${lv.pct}%"></i></div>
+    <span class="rm mono">${lv.pt.toLocaleString('tr-TR')} puan${lv.next?' · '+lv.next[1]+' için '+(lv.next[0]-lv.pt).toLocaleString('tr-TR')+' puan daha':''}</span>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn pri" data-act="share" data-id="all"${S.orders.length?'':' disabled'}>Toplam tasarruf kartı</button><button class="btn" data-act="wheel">Çarkı çevir</button></div></div>
+   <div><span class="eyebrow">Rozetler · ${S.badges.length}/${BADGES.length}</span><div class="bgrid">${BADGES.map(b=>`<div class="bdg${S.badges.includes(b[0])?' on':''}"><span>${b[1]}</span><b>${b[2]}</b><small>${b[3]}</small></div>`).join('')}</div></div></div>`;
+  if(!S.orders.length){$('#obody').innerHTML=`<div class="empty" style="margin-top:18px">Henüz hiçbir şey almadın. İlk siparişini verince kuryeyi buradan haritada izleyeceksin.<br><br><button class="btn pri" data-act="view" data-v="magaza">Mağazaya git</button></div>`;return}
+  if(!S.orders.find(o=>o.id===S.sel))S.sel=S.orders[0].id;
+  $('#obody').innerHTML=`<div class="olay"><div class="olist">${S.orders.map(o=>`<button class="oitem" data-act="sel" data-id="${o.id}" aria-current="${o.id===S.sel}">
+     <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b class="mono">${o.id}</b><span class="pill ${prog(o)>=1?'done':''}" data-pill="${o.id}">${prog(o)>=1?'Gelmedi':'Yolda'}</span></div>
+     <div style="font-size:22px;margin:6px 0 2px">${o.items.slice(0,6).map(i=>P[i.id]?P[i.id].e:'').join(' ')}</div>
+     <span class="mono">${new Date(o.at).toLocaleString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · ${fmt(o.total)}</span></button>`).join('')}
+     <button class="btn" data-act="clear">Geçmişi sil</button></div>
+   <div class="track" id="track"></div></div>`;
+  S.drawn=null;renderTrack();
+}
+const ROUTE='M40 190 H160 V120 H300 V60 H440 V150 H560';
+function renderTrack(){
+  const el=$('#track');if(!el)return;const o=S.orders.find(x=>x.id===S.sel);if(!o)return;const p=prog(o);
+  if(S.drawn!==o.id){S.drawn=o.id;S.wasDone=p>=1;
+    const blocks=[];for(let x=0;x<6;x++)for(let y=0;y<3;y++)blocks.push(`<rect class="blk" x="${20+x*98}" y="${14+y*72}" width="72" height="46" rx="6"/>`);
+    const bars=[];let s=0;for(const ch of o.id)s+=ch.charCodeAt(0);for(let i=0;i<46;i++){s=(s*73+11)%251;bars.push(`<i style="width:${1+s%4}px;margin-right:${1+(s>>3)%3}px"></i>`)}
+    el.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:end"><div><span class="eyebrow">Canlı takip · ${esc(o.city)}</span><h2 style="font-size:28px" id="tstage"></h2></div><span class="count" style="background:var(--ink);color:var(--bg)" id="teta"></span></div>
+     <svg class="map" viewBox="0 0 600 230" role="img" aria-label="Kurye rotası">${blocks.join('')}<path class="road" d="${ROUTE}"/><path class="prog" id="tprog" d="${ROUTE}" pathLength="100" stroke-dasharray="0 100"/>
+      <text x="22" y="218">DEPO (BOŞ)</text><text x="520" y="136">EVİN</text><circle cx="560" cy="150" r="9" fill="var(--blue)"/>
+      <g id="tcour"><circle r="15" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/><text text-anchor="middle" dy="6" style="font-size:17px">${SPEED[o.speed][0]}</text></g></svg>
+     <div class="tl" id="ttl">${STAGES.map(s=>`<div>${s[1]}</div>`).join('')}</div>
+     <div id="tres"></div>
+     <div class="receipt"><b>ALMADIM. · ALINMAMA FİŞİ</b><span>No: ${o.id} · ${esc(o.name)}</span><span>--------------------------------</span>
+      ${o.items.map(i=>P[i.id]?`<div class="sum"><span>${i.q} × ${esc(P[i.id].n)}</span><span>${fmt(P[i.id].p*i.q)}</span></div>`:'').join('')}
+      <span>--------------------------------</span><div class="sum"><span>TOPLAM</span><span>${fmt(o.total)}</span></div><div class="sum"><span>Ödeme: ${o.card?'Kart •••• '+o.card.l4+(o.card.tak>1?' · '+o.card.tak+' taksit':''):PAY[o.pay][1]}</span><span>₺0</span></div>
+      <div class="barcode" aria-hidden="true">${bars.join('')}</div></div>
+     <button class="btn pri" data-act="share" data-id="${o.id}">Tasarruf kartını göster</button>`;
+  }
+  let st=0;STAGES.forEach((s,i)=>{if(p>=s[0])st=i});
+  $('#tstage').textContent=STAGES[st][1];
+  const left=Math.max(0,Math.ceil((o.at+o.dur-Date.now())/1000));
+  $('#teta').textContent=p>=1?'00:00':String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');
+  const path=$('#tprog');path.setAttribute('stroke-dasharray',(p*100)+' 100');
+  const pt=path.getPointAtLength(path.getTotalLength()*p);$('#tcour').setAttribute('transform',`translate(${pt.x} ${pt.y})`);
+  [...$('#ttl').children].forEach((d,i)=>d.classList.toggle('on',i<=st));
+  const res=$('#tres');
+  if(p>=1&&!res.innerHTML){res.innerHTML=`<div class="result"><h3>${fmt(o.total)} cebinde kaldı.</h3>Kurye kapına kadar geldi, zili çalmadı ve gitti. Paket yok, borç yok, pişmanlık yok. Bu parayla ${Math.floor(o.total/20).toLocaleString('tr-TR')} simit alınırdı ama onu da almadın.<div style="margin-top:12px"><button class="btn ink" data-act="view" data-v="magaza">Bir şey daha alma</button></div></div>`;
+    const pl=document.querySelector(`[data-pill="${o.id}"]`);if(pl){pl.textContent='Gelmedi';pl.classList.add('done')}
+    if(!S.wasDone){S.wasDone=true;confetti()}}
+}
+
+/* ---------- ortak ---------- */
+function go(v){S.view=v;try{history.replaceState(null,'','#'+v)}catch(e){}renderHead();if(v==='siparisler')renderOrders();window.scrollTo(0,0)}
+function closeVeil(){$('#veil').hidden=true;$('#veil').innerHTML='';if(S.pm){S.pm=null;renderStrips();clearTimeout(S.adT);S.adT=setTimeout(showAd,9000)}}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3600)}
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const c=$('#confetti'),x=c.getContext('2d');c.hidden=false;c.width=innerWidth;c.height=innerHeight;
+  const cs=getComputedStyle(document.documentElement),cols=['--pink','--blue','--sun','--ok'].map(v=>cs.getPropertyValue(v));
+  const ps=Array.from({length:110},()=>({x:c.width/2,y:c.height*.35,vx:(Math.random()-.5)*16,vy:-Math.random()*13-3,s:5+Math.random()*7,c:cols[Math.floor(Math.random()*4)],r:Math.random()*6}));
+  let f=0;(function loop(){x.clearRect(0,0,c.width,c.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.42;p.r+=.2;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/3,p.s,p.s*.6);x.restore()});
+    if(++f<120)requestAnimationFrame(loop);else c.hidden=true})();
+}
+document.addEventListener('click',e=>{
+  if(e.target.id==='veil'){closeVeil();return}
+  const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act,id=+b.dataset.id;if(b.closest('#ad')&&a!=='adclose')hideAd();
+  if(a==='view'){closeVeil();go(b.dataset.v)}
+  else if(a==='cat'){S.cat=b.dataset.k;S.f.brand='';S.shown=24;renderChips();renderBrands();renderGrid()}
+  else if(a==='favf'){S.favOnly=!S.favOnly;S.shown=24;renderGrid()}
+  else if(a==='more'){S.shown+=24;renderGrid()}
+  else if(a==='open')openProduct(id);
+  else if(a==='fav'){const i=S.favs.indexOf(id);i<0?S.favs.push(id):S.favs.splice(i,1);save();checkBadges();if(i<0){clearTimeout(S.dT);S.dT=setTimeout(dropTick,22000)}document.querySelectorAll(`[data-act=fav][data-id="${id}"]`).forEach(x=>x.setAttribute('aria-pressed',i<0));if(S.favOnly)renderGrid()}
+  else if(a==='add'){S.cart[id]=(S.cart[id]||0)+1;S.cartPing=Date.now();save();renderHead();if(b.dataset.then==='cart')openCart(0);else toast(P[id].n+' sepete atıldı. Kartın hiçbir şey hissetmedi.')}
+  else if(a==='cart')openCart(0);
+  else if(a==='pq'){S.pm.qty=Math.max(1,Math.min(99,S.pm.qty+(+b.dataset.d)));$('#pq').textContent=S.pm.qty}
+  else if(a==='addq'){const m=S.pm;S.cart[m.id]=(S.cart[m.id]||0)+m.qty;save();renderHead();openCart(0)}
+  else if(a==='bundle'){b.dataset.ids.split(',').forEach(i=>{S.cart[i]=(S.cart[i]||0)+1});save();renderHead();openCart(0)}
+  else if(a==='thumb'){const t=THUMB[+b.dataset.i],m=$('#pmain');m.style.setProperty('--h',(P[S.pm.id].h+t[1]+360)%360);m.querySelector('span').style.transform=t[0];document.querySelectorAll('[data-act=thumb]').forEach(x=>x.setAttribute('aria-pressed',x===b))}
+  else if(a==='morerev'){const m=S.pm;m.rs+=5;$('#revlist').innerHTML=m.revs.slice(0,m.rs).map(revHTML).join('');if(m.rs>=m.revs.length)b.hidden=true}
+  else if(a==='close')closeVeil();
+  else if(a==='inc'||a==='dec'){S.cart[id]=(S.cart[id]||0)+(a==='inc'?1:-1);if(S.cart[id]<=0)delete S.cart[id];save();renderHead();renderCart()}
+  else if(a==='coupon'){const v=$('#coupon').value.trim().toUpperCase();const wc=LS.get('coupon',null),pct={DOPAMIN:20,BEDAVA:20,ALMADIM:20}[v]||(wc&&wc.code===v?wc.pct:0);S.coupon=pct;S.ccode=pct?v:'';renderCart();toast(pct?'Kupon uygulandı: -%'+pct+'. Sıfırın indirimlisi yine sıfır.':'Bu kupon geçmiyor. DOPAMIN yaz ya da çarkı çevir.')}
+  else if(a==='step'){readForm();S.step=+b.dataset.s;renderCart()}
+  else if(a==='order'){readForm();const c=S.card;
+    if(S.form.pay!=='kart')placeOrder();
+    else if(c.no.length!==16||!c.name.trim()||!/^(0[1-9]|1[0-2])\/\d\d$/.test(c.exp)||c.cvv.length!==3)toast('Sahte de olsa kart eksik. Alanları doldur ya da rastgele sahte kart üret.');
+    else{S.step=3;renderCart();startOtp()}}
+  else if(a==='confirm'){b.disabled=true;b.textContent='₺0 çekiliyor…';setTimeout(placeOrder,1300)}
+  else if(a==='fake'){S.card=fakeCard();renderCart()}
+  else if(a==='adclose')hideAd();
+  else if(a==='wheel')openWheel();
+  else if(a==='spin')spin();
+  else if(a==='notes')openNotes();
+  else if(a==='noteclear'){S.notes=[];LS.set('notes',S.notes);renderHead();openNotes()}
+  else if(a==='share')openShare(b.dataset.id);
+  else if(a==='copy')copyShare();
+  else if(a==='fdisc'){S.f.disc=!S.f.disc;S.shown=24;renderGrid()}
+  else if(a==='fclear'){S.f={min:'',max:'',brand:'',rate:0,disc:false};$('#f-min').value='';$('#f-max').value='';$('#f-rate').value='0';S.shown=24;renderBrands();renderGrid()}
+  else if(a==='sel'){S.sel=b.dataset.id;renderOrders()}
+  else if(a==='clear'){S.orders=[];save();renderHead();renderOrders();toast('Geçmiş silindi. Sayaç sıfırlandı.')}
+});
+document.addEventListener('input',e=>{const t=e.target;if(t.id&&t.id.startsWith('hk-'))cardInput(t);else if(t.id==='f-min'||t.id==='f-max'){t.value=t.value.replace(/\D/g,'').slice(0,12);S.f[t.id.slice(2)]=t.value;S.shown=24;renderGrid()}});
+document.addEventListener('change',e=>{const t=e.target;if(t.name==='pay'){S.form.pay=t.value;$('#cardform').hidden=t.value!=='kart'}else if(t.id==='hk-tak')cardInput(t);else if(t.id==='f-brand'){S.f.brand=t.value;S.shown=24;renderGrid()}else if(t.id==='f-rate'){S.f.rate=+t.value;S.shown=24;renderGrid()}});
+document.addEventListener('focusin',e=>{const c=$('#cc');if(c)c.classList.toggle('flip',e.target.id==='hk-cvv')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeVeil()});
+$('#q').addEventListener('input',e=>{S.q=e.target.value;S.shown=24;if(S.view!=='magaza')go('magaza');renderGrid()});
+$('#sort').addEventListener('change',e=>{S.sort=e.target.value;renderGrid()});
+
+const ADH=['Aklın hâlâ bunda mı?','Baktın, çıktın. O seni unutmadı.','Sepetin bunu soruyor.','Bir kez daha bakmaz mısın?','Seni bekliyor. Gelmeyecek ama bekliyor.','Fiyatı düştü. Çekilecek tutar hâlâ ₺0.','Az önce baktığın şey tükenmek üzere.','Dün gece rüyanda bunu gördün.'];
+let adHide;function hideAd(){$('#ad').hidden=true;clearTimeout(adHide)}
+function showAd(){const rc=S.recent.map(i=>P[i]).filter(p=>p&&!S.cart[p.id]);if(!rc.length||!$('#veil').hidden||!$('#ad').hidden)return;
+  const p=rc[Math.floor(Math.random()*Math.min(rc.length,6))];
+  $('#ad').style.setProperty('--h',p.h);
+  $('#ad').innerHTML=`<button class="x" data-act="adclose" aria-label="Reklamı kapat">×</button><span class="tag">${p.disc?'Sana özel -%'+p.disc:'Sana özel'}</span>
+   <button class="at" data-act="open" data-id="${p.id}" aria-label="${esc(p.n)}">${p.e}</button>
+   <div class="ab"><span class="adlbl">REKLAM · SON BAKTIKLARINDAN</span><h3>${ADH[Math.floor(Math.random()*ADH.length)]}</h3>
+    <span>${esc(p.n)}</span><div class="price" style="padding-top:0"><b>${fmt(p.p)}</b>${p.disc?`<s>${fmt(p.old)}</s>`:''}</div>
+    <div class="arow"><button class="btn pri" data-act="add" data-id="${p.id}">Sepete at</button><button class="btn" data-act="open" data-id="${p.id}">İncele</button></div></div>`;
+  $('#ad').hidden=false;clearTimeout(adHide);adHide=setTimeout(hideAd,16000)}
+setInterval(showAd,40000);
+const DIST=['Kadıköy','Çankaya','Karşıyaka','Nilüfer','Muratpaşa','Tepebaşı','Ortahisar','Beşiktaş'];
+function proof(){if($('#veil').hidden&&S.view==='magaza'){const p=P[Math.floor(Math.random()*P.length)];toast(DIST[Math.floor(Math.random()*DIST.length)]+"'dan biri az önce "+p.n+' almadı.')}}
+setTimeout(proof,9000);setInterval(proof,45000);
+
+const h=(location.hash||'').slice(1);if(['siparisler','hakkinda'].includes(h))S.view=h;
+renderChips();renderBrands();renderGrid();renderDeal();renderStrips();renderHead();checkBadges(true);if(S.view==='siparisler')renderOrders();tick();setInterval(tick,500);
+})();
+</script>
+</body>
+</html>
